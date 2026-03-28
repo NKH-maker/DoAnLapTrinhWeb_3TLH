@@ -1,0 +1,16 @@
+@model TINH_FINAL_2256.Models.Product
+
+@{
+    ViewData["Title"] = "Xóa sản phẩm - Admin";
+}
+
+<h2>Xóa sản phẩm</h2>
+
+<p>Bạn có chắc chắn muốn xóa sản phẩm này?</p>
+<p><b>@Model.Name</b></p>
+
+<form asp-area="Admin" asp-controller="Product" asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Xóa</button>
+    <a asp-area="Admin" asp-controller="Product" asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>

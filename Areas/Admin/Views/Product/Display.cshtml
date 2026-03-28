@@ -1,0 +1,20 @@
+@model TINH_FINAL_2256.Models.Product
+
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm - Admin";
+}
+
+<h2>Chi tiết sản phẩm</h2>
+
+<p><b>Tên:</b> @Model.Name</p>
+<p><b>Giá:</b> @Model.Price</p>
+<p><b>Mô tả:</b> @Model.Description</p>
+<p><b>Danh mục:</b> @Model.Category?.Name</p>
+
+@if (!string.IsNullOrEmpty(Model.ImageUrl))
+{
+    <img src="@Model.ImageUrl" width="200" alt="@Model.Name" />
+}
+
+<br /><br />
+<a asp-area="Admin" asp-controller="Product" asp-action="Index" class="btn btn-secondary">Quay lại</a>

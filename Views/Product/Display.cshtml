@@ -1,0 +1,35 @@
+﻿@model TINH_FINAL_2256.Models.Product
+
+@{
+    ViewData["Title"] = Model.Name;
+    int numOfQuantity = 1;
+}
+
+<div class="container my-4">
+    <div class="card p-3">
+        <div class="row g-3">
+            <div class="col-md-5 text-center">
+                <img src="@Model.ImageUrl" class="img-fluid" style="max-height:360px; object-fit:contain; background:#fff;" alt="@Model.Name" />
+            </div>
+            <div class="col-md-7">
+                <h3>@Model.Name</h3>
+                <div class="mb-2 text-danger fw-bold">@Model.Price.ToString("#,##0") Vnđ</div>
+                <div class="text-muted-small mb-3">@Model.Category?.Name</div>
+
+                <p>@Model.Description</p>
+
+                <div class="d-flex gap-2 mt-4">
+                    <a asp-controller="ShoppingCart"
+                       asp-action="AddToCart"
+                       asp-route-productId="@Model.Id"
+                       asp-route-quantity="@numOfQuantity"
+                       class="btn btn-outline-dark">
+                        <i class="bi-cart-fill me-1"></i> Thêm vào giỏ
+                    </a>
+
+                    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

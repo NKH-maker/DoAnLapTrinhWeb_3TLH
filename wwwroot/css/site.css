@@ -1,0 +1,227 @@
+/* Base font sizing */
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+  background: #f5f5f7;
+  color: #222;
+}
+
+/* Theme colors */
+:root {
+  --brand: #d32f2f; /* red */
+  --brand-dark: #b22a2a;
+  --muted: #6c757d;
+}
+
+/* Top header */
+.top-header {
+  background: var(--brand);
+  color: #fff;
+}
+.top-header a { color: #fff; }
+.top-header .btn-outline-light { border-color: rgba(255,255,255,0.3); }
+
+.top-search-input {
+  border-radius: 30px 0 0 30px;
+  padding: 0.6rem 1rem;
+}
+
+.top-header .input-group .btn {
+  border-radius: 0 30px 30px 0;
+}
+
+/* Product card */
+.card.product {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.card.product img {
+  background: #fff;
+  object-fit: contain;
+}
+
+/* Buttons */
+.btn-primary.custom {
+  background: var(--brand);
+  border-color: var(--brand-dark);
+}
+
+/* Login/Register card */
+.auth-card {
+  max-width: 420px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+/* Cart table */
+.table-cart {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+}
+
+/* Footer */
+.footer {
+  background: transparent;
+}
+
+/* Utility */
+.text-muted-small { color: var(--muted); font-size: 0.9rem; }
+
+/* Left sidebar */
+.left-panel {
+  /* Use normal flow so sidebar sits next to banner inside Home page */
+  position: relative;
+  top: auto; /* no fixed positioning */
+  left: auto;
+  width: 100%; /* fill column width */
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  padding: 12px;
+  z-index: 1050;
+}
+.left-panel .nav-item { padding: 8px 6px; }
+.left-panel .nav-link { color: #333; }
+
+/* Keep previous fixed style for potential use elsewhere */
+.left-panel.fixed {
+  position: fixed;
+  top: 76px;
+  left: 10px;
+  width: 220px;
+}
+
+@media (max-width: 992px) {
+  .left-panel { display: none; }
+}
+
+@media (max-width: 576px) {
+  .top-search-input { font-size: 0.9rem; }
+}
+
+/* Contact floating button */
+.contact-btn {
+  position: fixed;
+  right: 16px;
+  bottom: 24px;
+  background: var(--brand);
+  color: #fff;
+  border-radius: 999px;
+  padding: 10px 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  z-index: 2000; /* ensure visible */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.contact-btn i { font-size: 1.05rem; }
+.contact-btn:hover { background: var(--brand-dark); color: #fff; text-decoration: none; }
+
+/* Tabs - category header */
+.category-tabs .nav-tabs {
+  border-bottom: none;
+}
+.category-tabs .nav-tabs .nav-link {
+  border: none;
+  padding: 12px 20px;
+  font-weight: 600;
+  color: #333;
+  border-radius: 6px 6px 0 0;
+}
+.category-tabs .nav-tabs .nav-link.active {
+  background: linear-gradient(180deg, rgba(211,47,47,0.12), rgba(211,47,47,0.02));
+  color: var(--brand-dark);
+  box-shadow: inset 0 -2px 0 var(--brand);
+}
+
+/* Accessory grid */
+.accessory-grid {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.03);
+}
+.accessory-grid .item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-right: 1px solid #f0f0f0;
+}
+.accessory-grid .item img { width: 42px; height: 42px; object-fit:contain; }
+.accessory-grid .item:last-child { border-right: none; }
+
+@media (min-width: 768px) {
+  .accessory-grid .item { min-height: 80px; }
+}
+
+@media (max-width: 576px) {
+  .contact-btn { right: 10px; bottom: 12px; padding: 8px 10px; }
+  .accessory-grid .item { padding: 8px; }
+}
+
+/* Page title */
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #222;
+}
+
+/* Category chips (rounded rectangle) */
+.category-chip {
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  padding: 8px 14px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.03);
+}
+.category-chip.active {
+  border-color: var(--brand-dark);
+  background: linear-gradient(180deg, rgba(211,47,47,0.06), rgba(211,47,47,0.01));
+  color: var(--brand-dark);
+}
+
+/* Left panel active link */
+.left-panel .nav-link.active {
+  background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.00));
+  border-radius: 8px;
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.03);
+}
+
+/* Tab active */
+.category-tabs .nav-link.active {
+  color: var(--brand-dark);
+  border-bottom: 3px solid var(--brand);
+}
+
+/* Product card small tweaks */
+.card.h-100 { border-radius: 8px; }
+
+/* Make category-chip appear pointer */
+.category-chip { cursor: pointer; }

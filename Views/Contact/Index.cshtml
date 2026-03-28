@@ -1,0 +1,45 @@
+@model TINH_FINAL_2256.Models.ContactFormModel
+
+@{
+    ViewData["Title"] = "Liên h?";
+}
+
+<div class="container my-4">
+    <h2>Liên h?</h2>
+
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-info">@ViewBag.Message</div>
+    }
+
+    <form asp-action="Send" method="post">
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">H? tên</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label">Email</label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Subject" class="form-label">Ch? ??</label>
+            <input asp-for="Subject" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Message" class="form-label">N?i dung</label>
+            <textarea asp-for="Message" class="form-control" rows="5"></textarea>
+            <span asp-validation-for="Message" class="text-danger"></span>
+        </div>
+
+        <button class="btn btn-primary" type="submit">G?i</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

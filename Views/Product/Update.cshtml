@@ -1,0 +1,39 @@
+﻿@model TINH_FINAL_2256.Models.Product
+
+<h2 class="text-center my-4">Edit Product</h2>
+
+<div class="container" style="max-width:600px;">
+    <form asp-action="Update" method="post" enctype="multipart/form-data" class="shadow p-4 rounded bg-light">
+
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="ImageUrl" />
+
+        <div class="mb-3">
+            <label>Name</label>
+            <input asp-for="Name" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Price</label>
+            <input asp-for="Price" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Description</label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label>Category</label>
+            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-control"></select>
+        </div>
+
+        <div class="mb-3">
+            <label>New Image</label>
+            <input type="file" name="imageUrl" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-warning w-100">Update Product</button>
+
+    </form>
+</div>

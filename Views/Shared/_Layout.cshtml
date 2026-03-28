@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - 3TLH Phone</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap icons-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TINH_FINAL_2256.styles.css" asp-append-version="true" />
+</head>
+
+<body>
+    <header>
+        <!-- Unified single header (red) -->
+        <div class="top-header bg-danger text-white py-3">
+            <div class="container d-flex align-items-center gap-3">
+                <a class="text-white text-decoration-none fw-bold fs-4 me-3" asp-area="" asp-controller="Home"
+                    asp-action="Index">3TLH Phone</a>
+
+                <!-- Navigation links (moved into single header) -->
+                <ul class="nav me-3 d-none d-md-flex">
+                    <li class="nav-item"><a class="nav-link text-white px-2" asp-area="" asp-controller="Home"
+                            asp-action="Index">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link text-white px-2" asp-area="" asp-controller="Product"
+                            asp-action="Index">Sản phẩm</a></li>
+                </ul>
+
+                <!-- Search form -->
+                <form asp-controller="Product" asp-action="Index" method="get" class="flex-grow-1">
+                    <div class="input-group">
+                        <input type="search" name="q" class="form-control top-search-input"
+                            placeholder="Nhập tên điện thoại, laptop, phụ kiện..." value="@Context.Request.Query["q"]"
+                            aria-label="Search" />
+                        <button class="btn btn-light" type="submit"><i class="bi-search"></i> Tìm</button>
+                    </div>
+                </form>
+
+                <div class="d-flex align-items-center gap-2 ms-3">
+                    <partial name="_LoginPartial" />
+                    <a asp-controller="ShoppingCart" asp-action="Index" class="btn btn-dark btn-sm">
+                        <i class="bi-cart-fill me-1"></i>
+                        Giỏ hàng
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Link to contact page instead of mailto to avoid client-side issues -->
+    <a class="contact-btn" asp-controller="Contact" asp-action="Index" role="button" aria-label="Liên hệ"> <i class="bi bi-headset"></i> Liên hệ</a>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; @DateTime.Now.Year - 3TLH Phone
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

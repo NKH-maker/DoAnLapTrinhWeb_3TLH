@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\TINH_FINAL_2256.props" />
+</Project>

@@ -1,0 +1,40 @@
+﻿@model TINH_FINAL_2256.Models.Product
+
+<h2 class="text-center my-4">Add Product</h2>
+
+<div class="container" style="max-width:600px;">
+    <form asp-action="Add" method="post" enctype="multipart/form-data" class="shadow p-4 rounded bg-light">
+
+        <div asp-validation-summary="All" class="text-danger"></div>
+
+        <div class="mb-3">
+            <label>Name</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label>Price</label>
+            <input asp-for="Price" class="form-control" />
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label>Description</label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label>Category</label>
+            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-control"></select>
+        </div>
+
+        <div class="mb-3">
+            <label>Image</label>
+            <input type="file" name="imageUrl" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-success w-100">Add Product</button>
+
+    </form>
+</div>

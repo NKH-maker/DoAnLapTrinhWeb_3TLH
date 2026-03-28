@@ -1,0 +1,51 @@
+@model TINH_FINAL_2256.Models.Product
+
+@{
+    ViewData["Title"] = "Sửa sản phẩm - Admin";
+}
+
+<h2>Sửa sản phẩm</h2>
+
+<form asp-area="Admin" asp-controller="Product" asp-action="Update" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ImageUrl" />
+
+    <div class="form-group mb-2">
+        <label asp-for="Name">Tên</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-2">
+        <label asp-for="Price">Giá</label>
+        <input asp-for="Price" class="form-control" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-2">
+        <label asp-for="Description">Mô tả</label>
+        <input asp-for="Description" class="form-control" />
+    </div>
+
+    <div class="form-group mb-2">
+        <label asp-for="CategoryId">Danh mục</label>
+        <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-control"></select>
+    </div>
+
+    <div class="form-group mb-2">
+        <label>Hình ảnh</label>
+        <input type="file" name="imageUrl" class="form-control" />
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" alt="@Model.Name" style="max-width: 200px; margin-top: 8px;" />
+        }
+    </div>
+
+    <br />
+    <button type="submit" class="btn btn-primary">Cập nhật</button>
+    <a asp-area="Admin" asp-controller="Product" asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

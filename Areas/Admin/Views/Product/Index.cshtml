@@ -1,0 +1,48 @@
+@model IEnumerable<TINH_FINAL_2256.Models.Product>
+
+@{
+    ViewData["Title"] = "Quản lý Sản phẩm - Admin";
+}
+
+<h2>Quản lý Sản phẩm</h2>
+
+<p>
+    <a asp-area="Admin" asp-controller="Product" asp-action="Add" class="btn btn-primary">Thêm sản phẩm</a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Hình ảnh</th>
+            <th>Tên</th>
+            <th>Giá</th>
+            <th>Danh mục</th>
+            <th width="220">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <img src="@item.ImageUrl" width="80" alt="@item.Name" />
+                    }
+                    else
+                    {
+                        <span>-</span>
+                    }
+                </td>
+                <td>@item.Name</td>
+                <td>@item.Price</td>
+                <td>@item.Category?.Name</td>
+                <td>
+                    <a asp-area="Admin" asp-controller="Product" asp-action="Display" asp-route-id="@item.Id" class="btn btn-info btn-sm">Xem</a>
+                    <a asp-area="Admin" asp-controller="Product" asp-action="Update" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Sửa</a>
+                    <a asp-area="Admin" asp-controller="Product" asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

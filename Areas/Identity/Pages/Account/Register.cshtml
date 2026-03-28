@@ -1,0 +1,58 @@
+@page
+@model TINH_FINAL_2256.Areas.Identity.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Đăng ký";
+}
+
+<div class="auth-card">
+    <h3 class="mb-3 text-center">@ViewData["Title"]</h3>
+    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-2" role="alert"></div>
+        <div class="form-floating mb-3">
+            <input asp-for="Input.FullName" class="form-control" placeholder="Họ tên" />
+            <label asp-for="Input.FullName">Họ tên</label>
+            <span asp-validation-for="Input.FullName" class="text-danger"></span>
+        </div>
+        <div class="form-floating mb-3">
+            <input asp-for="Input.Email" class="form-control" autocomplete="username" placeholder="Email" />
+            <label asp-for="Input.Email">Email</label>
+            <span asp-validation-for="Input.Email" class="text-danger"></span>
+        </div>
+        <div class="form-floating mb-3">
+            <input asp-for="Input.Password" class="form-control" autocomplete="new-password" placeholder="Mật khẩu" />
+            <label asp-for="Input.Password">Mật khẩu</label>
+            <span asp-validation-for="Input.Password" class="text-danger"></span>
+        </div>
+        <div class="form-floating mb-3">
+            <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" placeholder="Xác nhận mật khẩu" />
+            <label asp-for="Input.ConfirmPassword">Xác nhận mật khẩu</label>
+            <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+        </div>
+        <div class="form-floating mb-3">
+            <input asp-for="Input.Address" class="form-control" placeholder="Địa chỉ" />
+            <label asp-for="Input.Address">Địa chỉ</label>
+            <span asp-validation-for="Input.Address" class="text-danger"></span>
+        </div>
+        <div class="form-floating mb-3">
+            <input asp-for="Input.Age" class="form-control" placeholder="Tuổi" />
+            <label asp-for="Input.Age">Tuổi</label>
+            <span asp-validation-for="Input.Age" class="text-danger"></span>
+        </div>
+        @if (Model.RoleList != null && Model.RoleList.Any())
+        {
+            <div class="form-floating mb-3">
+                <select asp-for="Input.Role" asp-items="@Model.RoleList" class="form-select">
+                    <option disabled selected>--Chọn vai trò--</option>
+                </select>
+                <label asp-for="Input.Role">Vai trò</label>
+            </div>
+        }
+        <div>
+            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Đăng ký</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
