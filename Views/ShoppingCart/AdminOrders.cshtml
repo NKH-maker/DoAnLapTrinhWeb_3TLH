@@ -1,0 +1,35 @@
+@model IEnumerable<TINH_FINAL_2256.Models.Order>
+
+@{
+    ViewData["Title"] = "??n hàng - Admin";
+}
+
+<h2>Danh sách ??n hàng</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Ng??i ??t</th>
+            <th>Ngày</th>
+            <th>T?ng ti?n</th>
+            <th>S? m?t hàng</th>
+            <th>Chi ti?t</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var o in Model)
+        {
+            <tr>
+                <td>@o.Id</td>
+                <td>@o.ApplicationUser?.Email</td>
+                <td>@o.OrderDate.ToString("g")</td>
+                <td>@o.TotalPrice.ToString("#,##0") Vn?</td>
+                <td>@(o.OrderDetails?.Sum(d => d.Quantity) ?? 0)</td>
+                <td>
+                    <a asp-controller="ShoppingCart" asp-action="OrderDetails" asp-route-id="@o.Id" class="btn btn-sm btn-primary">Xem</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

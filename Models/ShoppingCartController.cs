@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TINH_FINAL_2256.Extensions;
 using TINH_FINAL_2256.Repositories;
 using TINH_FINAL_2256.Models;
 
-namespace TINH_FINAL_2256.Controllers // ✅ SỬA ĐÚNG NAMESPACE
+namespace TINH_FINAL_2256.Controllers
 {
     public class ShoppingCartController : Controller
     {
@@ -45,8 +46,21 @@ namespace TINH_FINAL_2256.Controllers // ✅ SỬA ĐÚNG NAMESPACE
             return RedirectToAction("Index");
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            // If current user is admin, show all placed orders instead of session cart
+            if (User.IsInRole(SD.Role_Admin))
+            {
+                var orders = await _context.Orders
+                    .Include(o => o.ApplicationUser)
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
+                    .OrderByDescending(o => o.OrderDate)
+                    .ToListAsync();
+
+                return View("AdminOrders", orders);
+            }
+
             var cart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart")
                        ?? new ShoppingCart();
 
@@ -105,6 +119,19 @@ namespace TINH_FINAL_2256.Controllers // ✅ SỬA ĐÚNG NAMESPACE
             HttpContext.Session.Remove("Cart");
 
             return View("OrderCompleted", order.Id);
+        }
+
+        public async Task<IActionResult> OrderDetails(int id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.ApplicationUser)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null) return NotFound();
+
+            return View(order);
         }
     }
 }

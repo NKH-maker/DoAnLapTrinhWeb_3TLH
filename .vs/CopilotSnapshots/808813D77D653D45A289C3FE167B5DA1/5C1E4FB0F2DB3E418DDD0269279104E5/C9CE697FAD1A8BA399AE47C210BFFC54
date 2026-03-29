@@ -1,0 +1,64 @@
+﻿@model IEnumerable<TINH_FINAL_2256.Models.Product>
+
+@{
+    ViewData["Title"] = "Sản phẩm";
+    int numOfQuantity = 1;
+    var query = ViewData["SearchQuery"] as string ?? Context.Request.Query["q"].ToString();
+}
+
+<div class="container my-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h2 class="mb-0">Sản phẩm</h2>
+            @if (!string.IsNullOrWhiteSpace(query))
+            {
+                <small class="text-muted">Kết quả tìm kiếm cho "@query"</small>
+            }
+        </div>
+        <a asp-action="Add" class="btn btn-primary">+ Thêm sản phẩm</a>
+    </div>
+
+    <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-start">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="col-12">
+                <div class="alert alert-info">Chưa có sản phẩm nào.</div>
+            </div>
+        }
+        else
+        {
+            foreach (var item in Model)
+            {
+                <div class="col mb-4">
+                    <div class="card product h-100">
+                        <img src="@item.ImageUrl" class="card-img-top" alt="@item.Name" style="height:200px; object-fit:contain; background:#fff;" />
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title mb-2 text-truncate">@item.Name</h6>
+                            <p class="text-danger fw-bold mb-2">@item.Price.ToString("#,##0") Vnđ</p>
+                            <p class="text-muted small mb-3">@item.Category?.Name</p>
+                            <div class="mt-auto d-flex gap-2">
+                                <a asp-controller="ShoppingCart"
+                                   asp-action="AddToCart"
+                                   asp-route-productId="@item.Id"
+                                   asp-route-quantity="@numOfQuantity"
+                                   class="btn btn-outline-dark btn-sm">
+                                    <i class="bi-cart-fill me-1"></i>
+                                    Thêm
+                                </a>
+
+                                @* Edit/Delete only for admins *@
+                                @if (User.IsInRole(TINH_FINAL_2256.Models.SD.Role_Admin))
+                                {
+                                    <a asp-action="Update" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Sửa</a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">Xóa</a>
+                                }
+
+                                <a asp-action="Display" asp-route-id="@item.Id" class="btn btn-primary btn-sm">Xem</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

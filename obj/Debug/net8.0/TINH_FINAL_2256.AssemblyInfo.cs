@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TINH_FINAL_2256")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ff37341c5b435a9977a0c68d9b33101017f28805")]
 [assembly: System.Reflection.AssemblyProductAttribute("TINH_FINAL_2256")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TINH_FINAL_2256")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

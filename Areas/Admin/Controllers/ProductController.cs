@@ -1,3 +1,7 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -13,6 +17,10 @@ namespace TINH_FINAL_2256.Areas.Admin.Controllers
         private readonly IProductRepository _productRepository;
         private readonly ICategoryRepository _categoryRepository;
 
+        // Max image size 5 MB
+        private const long MaxImageSizeBytes = 5 * 1024 * 1024;
+        private static readonly string[] AllowedImageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+
         public ProductController(
             IProductRepository productRepository,
             ICategoryRepository categoryRepository)
@@ -21,10 +29,107 @@ namespace TINH_FINAL_2256.Areas.Admin.Controllers
             _categoryRepository = categoryRepository;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string q, int? categoryId, string sort = "name_asc", int page = 1)
         {
             var products = await _productRepository.GetAllAsync();
-            return View(products);
+            var categories = await _categoryRepository.GetAllAsync();
+            ViewBag.Categories = new SelectList(categories, "Id", "Name", categoryId);
+
+            var queryable = products.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                queryable = queryable.Where(p => !string.IsNullOrEmpty(p.Name) && p.Name.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+
+            if (categoryId.HasValue)
+            {
+                queryable = queryable.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            // sorting
+            queryable = sort switch
+            {
+                "name_desc" => queryable.OrderByDescending(p => p.Name),
+                "price_asc" => queryable.OrderBy(p => p.Price),
+                "price_desc" => queryable.OrderByDescending(p => p.Price),
+                _ => queryable.OrderBy(p => p.Name) // name_asc
+            };
+
+            int pageSize = 12;
+            var totalCount = queryable.Count();
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            var items = queryable.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            ViewData["CurrentPage"] = page;
+            ViewData["TotalPages"] = totalPages;
+            ViewData["SearchQuery"] = q;
+            ViewData["CurrentCategory"] = categoryId;
+            ViewData["SortOrder"] = sort;
+
+            return View(items);
+        }
+
+        // Export filtered list to CSV
+        public async Task<IActionResult> Export(string q, int? categoryId, string sort = "name_asc")
+        {
+            var products = await _productRepository.GetAllAsync();
+            var categories = await _categoryRepository.GetAllAsync();
+            var categoryLookup = categories.ToDictionary(c => c.Id, c => c.Name ?? string.Empty);
+
+            var queryable = products.AsQueryable();
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                queryable = queryable.Where(p => !string.IsNullOrEmpty(p.Name) && p.Name.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            if (categoryId.HasValue)
+            {
+                queryable = queryable.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            queryable = sort switch
+            {
+                "name_desc" => queryable.OrderByDescending(p => p.Name),
+                "price_asc" => queryable.OrderBy(p => p.Price),
+                "price_desc" => queryable.OrderByDescending(p => p.Price),
+                _ => queryable.OrderBy(p => p.Name)
+            };
+
+            var sb = new StringBuilder();
+            sb.AppendLine("Id,Name,Price,Category,ImageUrl,Description");
+            foreach (var p in queryable)
+            {
+                var cat = categoryLookup.ContainsKey(p.CategoryId) ? categoryLookup[p.CategoryId] : string.Empty;
+                var safeName = (p.Name ?? string.Empty).Replace("\"", "\"\"");
+                var safeDesc = (p.Description ?? string.Empty).Replace("\"", "\"\"");
+                sb.AppendLine($"{p.Id},\"{safeName}\",{p.Price},\"{cat.Replace('\"', ' ')}\",\"{(p.ImageUrl ?? string.Empty)}\",\"{safeDesc}\"");
+            }
+
+            var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+            return File(bytes, "text/csv", "products.csv");
+        }
+
+        // Bulk delete selected products
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BulkDelete(int[] ids)
+        {
+            if (ids == null || ids.Length == 0)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            foreach (var id in ids)
+            {
+                var product = await _productRepository.GetByIdAsync(id);
+                if (product != null)
+                {
+                    DeleteImage(product.ImageUrl);
+                    await _productRepository.DeleteAsync(id);
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Add()
@@ -35,21 +140,47 @@ namespace TINH_FINAL_2256.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(Product product, IFormFile imageUrl)
         {
             if (ModelState.IsValid)
             {
                 if (imageUrl != null)
                 {
-                    product.ImageUrl = await SaveImage(imageUrl);
+                    if (imageUrl.Length > MaxImageSizeBytes)
+                    {
+                        ModelState.AddModelError("ImageUrl", $"Kích th??c ?nh t?i ?a {MaxImageSizeBytes / (1024 * 1024)} MB");
+                        var categories = await _categoryRepository.GetAllAsync();
+                        ViewBag.Categories = new SelectList(categories, "Id", "Name", product.CategoryId);
+                        return View(product);
+                    }
+
+                    if (string.IsNullOrEmpty(imageUrl.ContentType) || !imageUrl.ContentType.StartsWith("image/"))
+                    {
+                        ModelState.AddModelError("ImageUrl", "T?p t?i lên không ph?i là ?nh.");
+                        var categories = await _categoryRepository.GetAllAsync();
+                        ViewBag.Categories = new SelectList(categories, "Id", "Name", product.CategoryId);
+                        return View(product);
+                    }
+
+                    var saved = await SaveImage(imageUrl);
+                    if (saved == null)
+                    {
+                        ModelState.AddModelError("ImageUrl", "Invalid image file. Allowed: .jpg, .jpeg, .png, .gif");
+                        var categories = await _categoryRepository.GetAllAsync();
+                        ViewBag.Categories = new SelectList(categories, "Id", "Name", product.CategoryId);
+                        return View(product);
+                    }
+
+                    product.ImageUrl = saved;
                 }
 
                 await _productRepository.AddAsync(product);
                 return RedirectToAction(nameof(Index));
             }
 
-            var categories = await _categoryRepository.GetAllAsync();
-            ViewBag.Categories = new SelectList(categories, "Id", "Name");
+            var cats = await _categoryRepository.GetAllAsync();
+            ViewBag.Categories = new SelectList(cats, "Id", "Name", product.CategoryId);
             return View(product);
         }
 
@@ -77,6 +208,7 @@ namespace TINH_FINAL_2256.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(int id, Product product, IFormFile imageUrl)
         {
             if (id != product.Id)
@@ -99,15 +231,43 @@ namespace TINH_FINAL_2256.Areas.Admin.Controllers
 
                 if (imageUrl != null)
                 {
-                    existingProduct.ImageUrl = await SaveImage(imageUrl);
+                    if (imageUrl.Length > MaxImageSizeBytes)
+                    {
+                        ModelState.AddModelError("ImageUrl", $"Kích th??c ?nh t?i ?a {MaxImageSizeBytes / (1024 * 1024)} MB");
+                        var categories = await _categoryRepository.GetAllAsync();
+                        ViewBag.Categories = new SelectList(categories, "Id", "Name", product.CategoryId);
+                        return View(product);
+                    }
+
+                    if (string.IsNullOrEmpty(imageUrl.ContentType) || !imageUrl.ContentType.StartsWith("image/"))
+                    {
+                        ModelState.AddModelError("ImageUrl", "T?p t?i lên không ph?i là ?nh.");
+                        var categories = await _categoryRepository.GetAllAsync();
+                        ViewBag.Categories = new SelectList(categories, "Id", "Name", product.CategoryId);
+                        return View(product);
+                    }
+
+                    // delete old image file if exists
+                    DeleteImage(existingProduct.ImageUrl);
+
+                    var saved = await SaveImage(imageUrl);
+                    if (saved == null)
+                    {
+                        ModelState.AddModelError("ImageUrl", "Invalid image file. Allowed: .jpg, .jpeg, .png, .gif");
+                        var categories = await _categoryRepository.GetAllAsync();
+                        ViewBag.Categories = new SelectList(categories, "Id", "Name", product.CategoryId);
+                        return View(product);
+                    }
+
+                    existingProduct.ImageUrl = saved;
                 }
 
                 await _productRepository.UpdateAsync(existingProduct);
                 return RedirectToAction(nameof(Index));
             }
 
-            var categories = await _categoryRepository.GetAllAsync();
-            ViewBag.Categories = new SelectList(categories, "Id", "Name");
+            var cats = await _categoryRepository.GetAllAsync();
+            ViewBag.Categories = new SelectList(cats, "Id", "Name", product.CategoryId);
             return View(product);
         }
 
@@ -122,21 +282,36 @@ namespace TINH_FINAL_2256.Areas.Admin.Controllers
         }
 
         [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            // retrieve product to get image path before deleting from repo
+            var product = await _productRepository.GetByIdAsync(id);
+            if (product != null)
+            {
+                DeleteImage(product.ImageUrl);
+            }
+
             await _productRepository.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
         private async Task<string> SaveImage(IFormFile image)
         {
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
+            // validate extension
+            var extension = Path.GetExtension(image.FileName).ToLowerInvariant();
+            if (string.IsNullOrEmpty(extension) || !AllowedImageExtensions.Contains(extension))
+            {
+                return null;
+            }
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
             if (!Directory.Exists(uploadsFolder))
             {
                 Directory.CreateDirectory(uploadsFolder);
             }
 
-            var fileName = Path.GetFileName(image.FileName);
+            var fileName = $"{Guid.NewGuid()}{extension}";
             var filePath = Path.Combine(uploadsFolder, fileName);
 
             using (var stream = new FileStream(filePath, FileMode.Create))
@@ -145,6 +320,27 @@ namespace TINH_FINAL_2256.Areas.Admin.Controllers
             }
 
             return "/images/" + fileName;
+        }
+
+        private void DeleteImage(string imageUrl)
+        {
+            if (string.IsNullOrEmpty(imageUrl))
+                return;
+
+            var relativePath = imageUrl.TrimStart('/');
+            var physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath.Replace('/', Path.DirectorySeparatorChar));
+
+            if (System.IO.File.Exists(physicalPath))
+            {
+                try
+                {
+                    System.IO.File.Delete(physicalPath);
+                }
+                catch
+                {
+                    // ignore deletion errors (log if you have logging)
+                }
+            }
         }
     }
 }

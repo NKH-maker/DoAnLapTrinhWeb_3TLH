@@ -1,0 +1,26 @@
+@model TINH_FINAL_2256.Models.Category
+
+@{
+    ViewData["Title"] = "S?a danh m?c - Admin";
+}
+
+<h2>S?a danh m?c</h2>
+
+<form asp-area="Admin" asp-controller="Category" asp-action="Update" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="form-group mb-2">
+        <label asp-for="Name">Tên</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <br />
+    <button type="submit" class="btn btn-primary">C?p nh?t</button>
+    <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="btn btn-secondary">H?y</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

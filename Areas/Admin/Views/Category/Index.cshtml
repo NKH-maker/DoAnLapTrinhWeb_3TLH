@@ -1,0 +1,35 @@
+@model IEnumerable<TINH_FINAL_2256.Models.Category>
+
+@{
+    ViewData["Title"] = "Qu?n lý danh m?c - Admin";
+}
+
+<h2>Qu?n lý danh m?c</h2>
+
+<p>
+    <a asp-area="Admin" asp-controller="Category" asp-action="Add" class="btn btn-primary">Thêm danh m?c</a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Tên</th>
+            <th width="180">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Name</td>
+                <td>
+                    <a asp-area="Admin" asp-controller="Category" asp-action="Display" asp-route-id="@item.Id" class="btn btn-info btn-sm">Xem</a>
+                    <a asp-area="Admin" asp-controller="Category" asp-action="Update" asp-route-id="@item.Id" class="btn btn-warning btn-sm">S?a</a>
+                    <a asp-area="Admin" asp-controller="Category" asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

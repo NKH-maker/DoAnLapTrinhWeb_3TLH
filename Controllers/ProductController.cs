@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using TINH_FINAL_2256.Models;
 using TINH_FINAL_2256.Repositories;
 
@@ -55,6 +56,8 @@ namespace TINH_FINAL_2256.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = SD.Role_Admin)]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(Product product, IFormFile imageUrl)
         {
             if (ModelState.IsValid)
@@ -103,6 +106,8 @@ namespace TINH_FINAL_2256.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = SD.Role_Admin)]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(int id, Product product, IFormFile imageUrl)
         {
             if (id != product.Id)
@@ -153,6 +158,8 @@ namespace TINH_FINAL_2256.Controllers
         }
 
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = SD.Role_Admin)]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _productRepository.DeleteAsync(id);

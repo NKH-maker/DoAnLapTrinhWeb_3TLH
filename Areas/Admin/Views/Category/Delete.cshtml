@@ -1,0 +1,19 @@
+@model TINH_FINAL_2256.Models.Category
+
+@{
+    ViewData["Title"] = "Xóa danh m?c - Admin";
+}
+
+<h2>Xóa danh m?c</h2>
+
+<div>
+    <h4>B?n có ch?c mu?n xóa danh m?c này?</h4>
+    <div>
+        <h5>Tên: @Model.Name</h5>
+    </div>
+    <form asp-area="Admin" asp-controller="Category" asp-action="Delete" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Xóa</button>
+        <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="btn btn-secondary">H?y</a>
+    </form>
+</div>

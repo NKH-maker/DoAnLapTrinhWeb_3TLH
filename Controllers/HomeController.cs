@@ -9,16 +9,27 @@ namespace TINH_FINAL_2256.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IProductRepository _productRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public HomeController(ILogger<HomeController> logger, IProductRepository productRepository)
+        public HomeController(ILogger<HomeController> logger, IProductRepository productRepository, ICategoryRepository categoryRepository)
         {
             _logger = logger;
             _productRepository = productRepository;
+            _categoryRepository = categoryRepository;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string category)
         {
             var products = await _productRepository.GetAllAsync();
+            var categories = await _categoryRepository.GetAllAsync();
+            ViewBag.Categories = categories;
+            ViewData["SelectedCategory"] = category ?? string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                products = products.Where(p => p.Category != null && p.Category.Name == category);
+            }
+
             return View(products);
         }
 

@@ -952,3 +952,4 @@ C:\Users\nkhbe\source\repos\TINH_FINAL_2256 - Part 3\obj\Debug\net8.0\refint\TIN
 C:\Users\nkhbe\source\repos\TINH_FINAL_2256 - Part 3\obj\Debug\net8.0\TINH_FINAL_2256.pdb
 C:\Users\nkhbe\source\repos\TINH_FINAL_2256 - Part 3\obj\Debug\net8.0\TINH_FINAL_2256.genruntimeconfig.cache
 C:\Users\nkhbe\source\repos\TINH_FINAL_2256 - Part 3\obj\Debug\net8.0\ref\TINH_FINAL_2256.dll
+C:\Users\nkhbe\source\repos\TINH_FINAL_2256 - Part 3\obj\Debug\net8.0\TINH_FINAL_2256.sourcelink.json

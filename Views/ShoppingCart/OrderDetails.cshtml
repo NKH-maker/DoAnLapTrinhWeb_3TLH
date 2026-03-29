@@ -1,0 +1,32 @@
+@model TINH_FINAL_2256.Models.Order
+
+@{
+    ViewData["Title"] = "Chi ti?t ??n hàng";
+}
+
+<h2>Chi ti?t ??n hàng #@Model.Id</h2>
+<p>Ng??i ??t: @Model.ApplicationUser?.Email</p>
+<p>Ngày: @Model.OrderDate.ToString("g")</p>
+<p>T?ng: @Model.TotalPrice.ToString("#,##0") Vn?</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>S?n ph?m</th>
+            <th>S? l??ng</th>
+            <th>Giá</th>
+            <th>Thành ti?n</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model.OrderDetails)
+        {
+            <tr>
+                <td>@d.Product?.Name</td>
+                <td>@d.Quantity</td>
+                <td>@d.Price.ToString("#,##0") Vn?</td>
+                <td>@(d.Quantity * d.Price).ToString("#,##0") Vn?</td>
+            </tr>
+        }
+    </tbody>
+</table>
