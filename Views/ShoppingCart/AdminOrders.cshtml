@@ -1,20 +1,20 @@
-@model IEnumerable<TINH_FINAL_2256.Models.Order>
+﻿@model IEnumerable<TINH_FINAL_2256.Models.Order>
 
 @{
-    ViewData["Title"] = "??n h�ng - Admin";
+    ViewData["Title"] = "đơn hàng - Admin";
 }
 
-<h2>Danh s�ch ??n h�ng</h2>
+<h2>Danh sách đơn hàng</h2>
 
 <table class="table table-striped">
     <thead>
         <tr>
             <th>Id</th>
-            <th>Ng??i ??t</th>
-            <th>Ng�y</th>
-            <th>T?ng ti?n</th>
-            <th>S? m?t h�ng</th>
-            <th>Chi ti?t</th>
+            <th>Người mua </th>
+            <th>Ngày</th>
+            <th>Tổng tiền</th>
+            <th>Số mặt hàng</th>
+            <th>Chi tiết</th>
         </tr>
     </thead>
     <tbody>
@@ -24,7 +24,7 @@
                 <td>@o.Id</td>
                 <td>@o.ApplicationUser?.Email</td>
                 <td>@o.OrderDate.ToString("g")</td>
-                <td>@o.TotalPrice.ToString("#,##0") Vn?</td>
+                <td>@o.TotalPrice.ToString("#,##0") VnD </td>
                 <td>@(o.OrderDetails?.Sum(d => d.Quantity) ?? 0)</td>
                 <td>
                     <a asp-controller="ShoppingCart" asp-action="OrderDetails" asp-route-id="@o.Id" class="btn btn-sm btn-primary">Xem</a>

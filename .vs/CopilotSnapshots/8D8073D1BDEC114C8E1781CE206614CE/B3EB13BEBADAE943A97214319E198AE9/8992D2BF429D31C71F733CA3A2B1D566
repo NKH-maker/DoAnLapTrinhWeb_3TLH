@@ -24,8 +24,8 @@
             <tr>
                 <td>@d.Product?.Name</td>
                 <td>@d.Quantity</td>
-                <td>@($"{d.Price:#,##0} Vnđ")</td>
-                <td>@($"{(d.Quantity * d.Price):#,##0} Vnđ")</td>
+                <td>@d.Price.ToString("#,##0") VnD </td>
+                <td>@d.(Quantity * d.Price) VnD </td>
             </tr>
         }
     </tbody>

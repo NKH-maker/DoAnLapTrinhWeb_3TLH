@@ -50,7 +50,7 @@
                                     <div class="fw-bold">@item.Name</div>
                                     <div class="text-muted-small">Số lượng: @item.Quantity</div>
                                 </div>
-                                <div class="text-end">@((item.Price * item.Quantity).ToString("#,##0")) Vnđ</div>
+                                <div class="text-end">@{(item.Price* item.Quantity):"#,##0")} Vnđ</div>/
                             </li>
                         }
                     </ul>

@@ -7,6 +7,13 @@
     var selectedCategory = ViewData["SelectedCategory"] as string ?? string.Empty;
     var categories = ViewBag.Categories as IEnumerable<TINH_FINAL_2256.Models.Category> ?? Enumerable.Empty<TINH_FINAL_2256.Models.Category>();
 
+    // define top groups: pairings as requested
+    var topGroups = new List<List<string>> {
+        new List<string> { "Điện thoại", "Máy tính bảng" },
+        new List<string> { "Phụ kiện", "Tai nghe" },
+        new List<string> { "Khuyến mãi" }
+    };
+
     if (Model != null)
     {
         foreach (var _p in Model)
@@ -48,6 +55,19 @@
         <div class="col-lg-9">
             <div class="card overflow-hidden shadow-sm">
                 <img src="@bannerImage" class="img-fluid w-100 home-banner" alt="Banner" />
+            </div>
+
+            <!-- Top grouped tabs -->
+            <div class="mt-3">
+                @foreach (var group in topGroups)
+                {
+                    <div class="d-flex gap-3 mb-2">
+                        @foreach (var label in group)
+                        {
+                            <a class="btn btn-outline-secondary px-4 py-2">@label</a>
+                        }
+                    </div>
+                }
             </div>
 
             <!-- Category chips (rounded rectangles) -->

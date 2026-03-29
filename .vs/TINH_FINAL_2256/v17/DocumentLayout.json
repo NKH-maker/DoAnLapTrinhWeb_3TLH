@@ -3,8 +3,32 @@
   "WorkspaceRootPath": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\views\\shoppingcart\\checkout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:views\\shoppingcart\\checkout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\views\\shoppingcart\\orderdetails.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:views\\shoppingcart\\orderdetails.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\models\\shoppingcartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:models\\shoppingcartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\views\\shoppingcart\\adminorders.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:views\\shoppingcart\\adminorders.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\areas\\admin\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:areas\\admin\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\areas\\admin\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:areas\\admin\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\areas\\admin\\views\\category\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:areas\\admin\\views\\category\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -23,10 +47,6 @@
       "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:tinh_final_2256.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\areas\\admin\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:areas\\admin\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\areas\\admin\\views\\category\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:areas\\admin\\views\\category\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -37,10 +57,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\areas\\admin\\views\\category\\update.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:areas\\admin\\views\\category\\update.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\areas\\admin\\views\\category\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:areas\\admin\\views\\category\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -61,18 +77,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
       "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\models\\shoppingcartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:models\\shoppingcartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\views\\shoppingcart\\adminorders.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:views\\shoppingcart\\adminorders.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|c:\\users\\nkhbe\\source\\repos\\tinh_final_2256 - part 3\\views\\shoppingcart\\orderdetails.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{C415D244-A634-49AC-8B6D-E8DCB654FE90}|TINH_FINAL_2256.csproj|solutionrelative:views\\shoppingcart\\orderdetails.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -82,8 +86,34 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 11,
+          "SelectedChildIndex": 1,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Update.cshtml",
+              "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Areas\\Admin\\Views\\Category\\Update.cshtml",
+              "RelativeDocumentMoniker": "Areas\\Admin\\Views\\Category\\Update.cshtml",
+              "ToolTip": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Areas\\Admin\\Views\\Category\\Update.cshtml",
+              "RelativeToolTip": "Areas\\Admin\\Views\\Category\\Update.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-29T05:59:28.167Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Checkout.cshtml",
+              "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Views\\ShoppingCart\\Checkout.cshtml",
+              "RelativeDocumentMoniker": "Views\\ShoppingCart\\Checkout.cshtml",
+              "ToolTip": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Views\\ShoppingCart\\Checkout.cshtml",
+              "RelativeToolTip": "Views\\ShoppingCart\\Checkout.cshtml",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAqwDUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-29T14:42:17.3Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
@@ -102,59 +132,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
-              "Title": "ShoppingCartController.cs",
-              "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Models\\ShoppingCartController.cs",
-              "RelativeDocumentMoniker": "Models\\ShoppingCartController.cs",
-              "ToolTip": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Models\\ShoppingCartController.cs",
-              "RelativeToolTip": "Models\\ShoppingCartController.cs",
-              "ViewState": "AgIAAIQAAAAAAAAAAEBVwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-29T07:25:40.342Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "HomeController.cs",
-              "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Controllers\\HomeController.cs",
-              "RelativeDocumentMoniker": "Controllers\\HomeController.cs",
-              "ToolTip": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Controllers\\HomeController.cs",
-              "RelativeToolTip": "Controllers\\HomeController.cs",
-              "ViewState": "AgIAACwAAAAAAAAAAABRwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-29T06:37:32.131Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "Delete.cshtml",
-              "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Areas\\Admin\\Views\\Category\\Delete.cshtml",
-              "RelativeDocumentMoniker": "Areas\\Admin\\Views\\Category\\Delete.cshtml",
-              "ToolTip": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Areas\\Admin\\Views\\Category\\Delete.cshtml",
-              "RelativeToolTip": "Areas\\Admin\\Views\\Category\\Delete.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-29T05:59:36.601Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "Update.cshtml",
-              "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Areas\\Admin\\Views\\Category\\Update.cshtml",
-              "RelativeDocumentMoniker": "Areas\\Admin\\Views\\Category\\Update.cshtml",
-              "ToolTip": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Areas\\Admin\\Views\\Category\\Update.cshtml",
-              "RelativeToolTip": "Areas\\Admin\\Views\\Category\\Update.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-29T05:59:28.167Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 12,
               "Title": "Add.cshtml",
               "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Areas\\Admin\\Views\\Category\\Add.cshtml",
               "RelativeDocumentMoniker": "Areas\\Admin\\Views\\Category\\Add.cshtml",
@@ -162,12 +140,11 @@
               "RelativeToolTip": "Areas\\Admin\\Views\\Category\\Add.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-29T05:59:16.562Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-29T05:59:16.562Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 11,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Areas\\Admin\\Views\\Category\\Index.cshtml",
               "RelativeDocumentMoniker": "Areas\\Admin\\Views\\Category\\Index.cshtml",
@@ -175,8 +152,7 @@
               "RelativeToolTip": "Areas\\Admin\\Views\\Category\\Index.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-29T05:59:02.31Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-29T05:59:02.31Z"
             },
             {
               "$type": "Document",
@@ -193,46 +169,84 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 4,
               "Title": "ProductController.cs",
               "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Areas\\Admin\\Controllers\\ProductController.cs",
               "RelativeDocumentMoniker": "Areas\\Admin\\Controllers\\ProductController.cs",
               "ToolTip": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Areas\\Admin\\Controllers\\ProductController.cs",
               "RelativeToolTip": "Areas\\Admin\\Controllers\\ProductController.cs",
-              "ViewState": "AgIAAH0AAAAAAAAAAAAIwHMAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAH0AAAAAAAAAAAAIwIgAAABFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-29T04:39:38.91Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "AdminOrders.cshtml",
-              "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Views\\ShoppingCart\\AdminOrders.cshtml",
-              "RelativeDocumentMoniker": "Views\\ShoppingCart\\AdminOrders.cshtml",
-              "ToolTip": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Views\\ShoppingCart\\AdminOrders.cshtml",
-              "RelativeToolTip": "Views\\ShoppingCart\\AdminOrders.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-29T07:25:54.454Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 1,
               "Title": "OrderDetails.cshtml",
               "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Views\\ShoppingCart\\OrderDetails.cshtml",
               "RelativeDocumentMoniker": "Views\\ShoppingCart\\OrderDetails.cshtml",
               "ToolTip": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Views\\ShoppingCart\\OrderDetails.cshtml",
               "RelativeToolTip": "Views\\ShoppingCart\\OrderDetails.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAAIAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-03-29T07:26:30.264Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 6,
+              "Title": "Delete.cshtml",
+              "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Areas\\Admin\\Views\\Category\\Delete.cshtml",
+              "RelativeDocumentMoniker": "Areas\\Admin\\Views\\Category\\Delete.cshtml",
+              "ToolTip": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Areas\\Admin\\Views\\Category\\Delete.cshtml",
+              "RelativeToolTip": "Areas\\Admin\\Views\\Category\\Delete.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-29T05:59:36.601Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AdminOrders.cshtml",
+              "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Views\\ShoppingCart\\AdminOrders.cshtml",
+              "RelativeDocumentMoniker": "Views\\ShoppingCart\\AdminOrders.cshtml",
+              "ToolTip": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Views\\ShoppingCart\\AdminOrders.cshtml",
+              "RelativeToolTip": "Views\\ShoppingCart\\AdminOrders.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-29T07:25:54.454Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ShoppingCartController.cs",
+              "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Models\\ShoppingCartController.cs",
+              "RelativeDocumentMoniker": "Models\\ShoppingCartController.cs",
+              "ToolTip": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Models\\ShoppingCartController.cs",
+              "RelativeToolTip": "Models\\ShoppingCartController.cs",
+              "ViewState": "AgIAAFUAAAAAAAAAAAAcwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-29T07:25:40.342Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "Controllers\\HomeController.cs",
+              "ViewState": "AgIAACwAAAAAAAAAAABRwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-29T06:37:32.131Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Views\\Product\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Product\\Index.cshtml",
@@ -240,12 +254,11 @@
               "RelativeToolTip": "Views\\Product\\Index.cshtml",
               "ViewState": "AgIAAEAAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-29T07:02:24.857Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-29T07:02:24.857Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 18,
               "Title": "site.css",
               "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\wwwroot\\css\\site.css",
               "RelativeDocumentMoniker": "wwwroot\\css\\site.css",
@@ -253,25 +266,24 @@
               "RelativeToolTip": "wwwroot\\css\\site.css",
               "ViewState": "AgIAABkBAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2026-03-29T07:16:27.507Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-29T07:16:27.507Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 15,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Views\\Home\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Home\\Index.cshtml",
               "ToolTip": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Views\\Home\\Index.cshtml",
               "RelativeToolTip": "Views\\Home\\Index.cshtml",
-              "ViewState": "AgIAAKYAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAJIAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-03-29T06:38:46.892Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 16,
               "Title": "ProductController.cs",
               "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Controllers\\ProductController.cs",
               "RelativeDocumentMoniker": "Controllers\\ProductController.cs",
@@ -279,12 +291,11 @@
               "RelativeToolTip": "Controllers\\ProductController.cs",
               "ViewState": "AgIAALoAAAAAAAAAAIBZwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-29T06:39:42.81Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-29T06:39:42.81Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 8,
               "Title": "a.gitignore.txt",
               "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\a.gitignore.txt",
               "RelativeDocumentMoniker": "a.gitignore.txt",
@@ -292,12 +303,11 @@
               "RelativeToolTip": "a.gitignore.txt",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
-              "WhenOpened": "2026-03-29T04:27:08.991Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-29T04:27:08.991Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 9,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\appsettings.json",
               "RelativeDocumentMoniker": "appsettings.json",
@@ -305,12 +315,11 @@
               "RelativeToolTip": "appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-03-29T04:27:02.541Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-29T04:27:02.541Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 7,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
@@ -318,12 +327,11 @@
               "RelativeToolTip": "Program.cs",
               "ViewState": "AgIAADAAAAAAAAAAAAAqwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-29T04:26:17.505Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-29T04:26:17.505Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 10,
               "Title": "TINH_FINAL_2256.csproj",
               "DocumentMoniker": "C:\\Users\\nkhbe\\source\\repos\\TINH_FINAL_2256 - Part 3\\TINH_FINAL_2256.csproj",
               "RelativeDocumentMoniker": "TINH_FINAL_2256.csproj",
@@ -331,8 +339,7 @@
               "RelativeToolTip": "TINH_FINAL_2256.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-03-29T04:25:46.271Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-29T04:25:46.271Z"
             }
           ]
         }
