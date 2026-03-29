@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TINH_FINAL_2256.Extensions;
@@ -85,6 +85,30 @@ namespace TINH_FINAL_2256.Controllers
             return RedirectToAction("Index");
         }
 
+        public IActionResult IncreaseQuantity(int productId)
+        {
+            var cart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart");
+            if (cart != null)
+            {
+                cart.IncreaseQuantity(productId);
+                HttpContext.Session.SetObjectAsJson("Cart", cart);
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        public IActionResult DecreaseQuantity(int productId)
+        {
+            var cart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart");
+            if (cart != null)
+            {
+                cart.DecreaseQuantity(productId);
+                HttpContext.Session.SetObjectAsJson("Cart", cart);
+            }
+
+            return RedirectToAction("Index");
+        }
+
         public IActionResult Checkout()
         {
             return View(new Order());
@@ -116,9 +140,39 @@ namespace TINH_FINAL_2256.Controllers
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
-            HttpContext.Session.Remove("Cart");
+            return RedirectToAction(nameof(Payment), new { id = order.Id });
+        }
 
-            return View("OrderCompleted", order.Id);
+        public async Task<IActionResult> Payment(int id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.ApplicationUser)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null) return NotFound();
+            return View(order);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ConfirmPayment(int id)
+        {
+            HttpContext.Session.Remove("Cart");
+            return RedirectToAction(nameof(OrderCompleted), new { id });
+        }
+
+        public async Task<IActionResult> OrderCompleted(int id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.ApplicationUser)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null) return NotFound();
+            return View(order);
         }
 
         public async Task<IActionResult> OrderDetails(int id)

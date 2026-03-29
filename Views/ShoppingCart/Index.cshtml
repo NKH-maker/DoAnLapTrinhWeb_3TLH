@@ -1,4 +1,4 @@
-﻿@model ShoppingCart
+@model ShoppingCart
 @using System.Linq
 
 <div class="container my-4">
@@ -29,7 +29,19 @@
                             {
                                 <tr>
                                     <td>@item.Name</td>
-                                    <td class="text-center">@item.Quantity</td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group" aria-label="quantity">
+                                            <a asp-controller="ShoppingCart"
+                                               asp-action="DecreaseQuantity"
+                                               asp-route-productId="@item.ProductId"
+                                               class="btn btn-outline-secondary">-</a>
+                                            <span class="btn btn-light disabled" style="min-width:52px">@item.Quantity</span>
+                                            <a asp-controller="ShoppingCart"
+                                               asp-action="IncreaseQuantity"
+                                               asp-route-productId="@item.ProductId"
+                                               class="btn btn-outline-secondary">+</a>
+                                        </div>
+                                    </td>
                                     <td class="text-end">@item.Price.ToString("#,##0") Vnđ</td>
                                     <td class="text-end">@((item.Price * item.Quantity).ToString("#,##0")) Vnđ</td>
                                     <td class="text-end">
