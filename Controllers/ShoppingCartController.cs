@@ -23,7 +23,6 @@ namespace TINH_FINAL_2256.Controllers
             _userManager = userManager;
         }
 
-
         public async Task<IActionResult> AddToCart(int productId, int quantity)
         {
             var product = await GetProductFromDatabase(productId);
@@ -33,7 +32,9 @@ namespace TINH_FINAL_2256.Controllers
                 ProductId = productId,
                 Name = product.Name,
                 Price = product.Price,
-                Quantity = quantity
+                Quantity = quantity,
+                ImageUrl = product.ImageUrl ?? "~/images/placeholder.png",
+                CategoryName = product.Category?.Name ?? string.Empty
             };
 
             var cart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart")
@@ -109,12 +110,22 @@ namespace TINH_FINAL_2256.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult Checkout()
+        // GET: Checkout - prefill info for logged-in users
+        public async Task<IActionResult> Checkout()
         {
-            return View(new Order());
+            var order = new Order();
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                order.PhoneNumber = user.PhoneNumber;
+                order.ShippingAddress = user.Address ?? string.Empty;
+            }
+            return View(order);
         }
 
+        // POST: Checkout
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Checkout(Order order)
         {
             var cart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart");
@@ -124,11 +135,23 @@ namespace TINH_FINAL_2256.Controllers
                 return RedirectToAction("Index");
             }
 
+            // Server-side validation
+            if (!ModelState.IsValid)
+            {
+                return View(order);
+            }
+
             var user = await _userManager.GetUserAsync(User);
 
-            order.UserId = user.Id;
+            order.UserId = user?.Id ?? string.Empty;
             order.OrderDate = DateTime.UtcNow;
             order.TotalPrice = cart.Items.Sum(i => i.Price * i.Quantity);
+
+            // Ensure non-null defaults
+            order.PhoneNumber = order.PhoneNumber ?? user?.PhoneNumber ?? string.Empty;
+            order.ShippingAddress = order.ShippingAddress ?? string.Empty;
+            order.Notes = order.Notes ?? string.Empty;
+            order.Status = order.Status ?? "Pending";
 
             order.OrderDetails = cart.Items.Select(i => new OrderDetail
             {
@@ -186,6 +209,85 @@ namespace TINH_FINAL_2256.Controllers
             if (order == null) return NotFound();
 
             return View(order);
+        }
+
+        // New: View orders for current customer
+        public async Task<IActionResult> MyOrders()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var orders = await _context.Orders
+                .Where(o => o.UserId == user.Id)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            return View(orders);
+        }
+
+        // New: Get recent orders for cart modal (AJAX endpoint)
+        public async Task<IActionResult> GetRecentOrders()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var orders = await _context.Orders
+                .Where(o => o.UserId == user.Id)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                .OrderByDescending(o => o.OrderDate)
+                .Take(3)
+                .ToListAsync();
+
+            return PartialView("_RecentOrdersPartial", orders);
+        }
+
+        // New: Cancel order (only if customer and not shipped/delivered)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelOrder(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id && o.UserId == user.Id);
+            if (order == null) return NotFound();
+
+            if (order.Status == "Shipped" || order.Status == "Delivered")
+            {
+                return BadRequest("Không th? h?y ??n ?ã v?n chuy?n ho?c giao hàng");
+            }
+
+            order.Status = "Cancelled";
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(MyOrders));
+        }
+
+        // New: Update shipping address and phone for an order (customer)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateOrder(int id, string shippingAddress, string phoneNumber)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id && o.UserId == user.Id);
+            if (order == null) return NotFound();
+
+            if (order.Status == "Shipped" || order.Status == "Delivered")
+            {
+                return BadRequest("Không th? s?a ??n ?ã v?n chuy?n ho?c giao hàng");
+            }
+
+            order.ShippingAddress = shippingAddress ?? order.ShippingAddress;
+            order.PhoneNumber = phoneNumber ?? order.PhoneNumber;
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(OrderDetails), new { id = id });
+        }
+
+        // API to return cart count and items for header modal
+        public IActionResult CartSummary()
+        {
+            var cart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart") ?? new ShoppingCart();
+            return PartialView("_CartSummaryPartial", cart);
         }
     }
 }

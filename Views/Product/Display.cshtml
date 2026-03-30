@@ -5,29 +5,107 @@
     int numOfQuantity = 1;
 }
 
-<div class="container my-4">
-    <div class="card p-3">
-        <div class="row g-3">
-            <div class="col-md-5 text-center">
-                <img src="@Model.ImageUrl" class="img-fluid" style="max-height:360px; object-fit:contain; background:#fff;" alt="@Model.Name" />
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index"><i class="bi bi-house me-1"></i>Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Product" asp-action="Index"><i class="bi bi-box me-1"></i>Sản phẩm</a></li>
+        <li class="breadcrumb-item active">@Model.Name</li>
+    </ol>
+</nav>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row g-4">
+            <!-- Product Image -->
+            <div class="col-lg-5">
+                <div class="text-center" style="background: var(--light-bg); border-radius: 12px; padding: 2rem;">
+                    <img src="@Model.ImageUrl" class="product-image" alt="@Model.Name" />
+                </div>
             </div>
-            <div class="col-md-7">
-                <h3>@Model.Name</h3>
-                <div class="mb-2 text-danger fw-bold">@Model.Price.ToString("#,##0") Vnđ</div>
-                <div class="text-muted-small mb-3">@Model.Category?.Name</div>
 
-                <p>@Model.Description</p>
+            <!-- Product Details -->
+            <div class="col-lg-7">
+                <!-- Header -->
+                <div class="mb-4">
+                    <div class="mb-2">
+                        <span class="badge bg-primary">
+                            <i class="bi bi-tag me-1"></i>@Model.Category?.Name
+                        </span>
+                    </div>
+                    <h2 class="fw-bold text-primary mb-3">@Model.Name</h2>
+                </div>
 
-                <div class="d-flex gap-2 mt-4">
+                <!-- Price Section -->
+                <div class="mb-4 p-3 rounded-3" style="background: var(--light-bg);">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <p class="text-secondary small mb-1">Giá bán</p>
+                            <p class="display-5 fw-bold text-danger mb-0">
+                                @Model.Price.ToString("#,##0") <span class="fs-6">đ</span>
+                            </p>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-2">
+                        <i class="bi bi-info-circle me-2"></i>Mô tả sản phẩm
+                    </h5>
+                    <p class="text-secondary" style="line-height: 1.8;">
+                        @if (string.IsNullOrEmpty(Model.Description))
+                        {
+                            <em>Không có mô tả chi tiết cho sản phẩm này.</em>
+                        }
+                        else
+                        {
+                            @Html.Raw(Model.Description.Replace("\n", "<br />"))
+                        }
+                    </p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 d-md-flex gap-md-2">
                     <a asp-controller="ShoppingCart"
                        asp-action="AddToCart"
                        asp-route-productId="@Model.Id"
                        asp-route-quantity="@numOfQuantity"
-                       class="btn btn-outline-dark">
-                        <i class="bi-cart-fill me-1"></i> Thêm vào giỏ
+                       class="btn btn-lg btn-primary">
+                        <i class="bi bi-cart-plus me-2"></i>
+                        Thêm vào giỏ hàng
                     </a>
 
-                    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+                    <a asp-action="Index" asp-controller="Product" class="btn btn-lg btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>
+                        Quay lại
+                    </a>
+                </div>
+
+                <!-- Additional Info -->
+                <div class="mt-4 pt-4 border-top">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-shield-check text-success me-2" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <p class="mb-0 small text-secondary">Sản phẩm chính hãng</p>
+                                    <p class="mb-0 fw-bold">100% Bảo hành</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-truck text-primary me-2" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <p class="mb-0 small text-secondary">Giao hàng nhanh</p>
+                                    <p class="mb-0 fw-bold">Toàn quốc</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,35 +1,80 @@
 @model IEnumerable<TINH_FINAL_2256.Models.Category>
 
 @{
-    ViewData["Title"] = "Qu?n lý danh m?c - Admin";
+    ViewData["Title"] = "Qu?n lý Danh m?c - Admin";
 }
 
-<h2>Qu?n lý danh m?c</h2>
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index"><i class="bi bi-speedometer2 me-1"></i>Admin</a></li>
+        <li class="breadcrumb-item active"><i class="bi bi-tag me-1"></i>Qu?n lý danh m?c</li>
+    </ol>
+</nav>
 
-<p>
-    <a asp-area="Admin" asp-controller="Category" asp-action="Add" class="btn btn-primary">Thêm danh m?c</a>
-</p>
+<div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="page-title mb-0">
+            <i class="bi bi-tag me-2"></i>Qu?n lý danh m?c
+        </h1>
+        <a asp-area="Admin" asp-controller="Category" asp-action="Add" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle me-2"></i>Thêm danh m?c
+        </a>
+    </div>
+    <p class="text-secondary">Qu?n lý các danh m?c s?n ph?m</p>
+</div>
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>Tên</th>
-            <th width="180">Thao tác</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Id</td>
-                <td>@item.Name</td>
-                <td>
-                    <a asp-area="Admin" asp-controller="Category" asp-action="Display" asp-route-id="@item.Id" class="btn btn-info btn-sm">Xem</a>
-                    <a asp-area="Admin" asp-controller="Category" asp-action="Update" asp-route-id="@item.Id" class="btn btn-warning btn-sm">S?a</a>
-                    <a asp-area="Admin" asp-controller="Category" asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Xóa</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr class="bg-light">
+                    <th>ID</th>
+                    <th>Tên danh m?c</th>
+                    <th class="text-center">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="3" class="text-center py-4">
+                            <i class="bi bi-inbox" style="font-size: 2rem; color: var(--text-secondary);"></i>
+                            <p class="text-secondary mt-2">Ch?a có danh m?c nào</p>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="badge bg-secondary">@item.Id</span>
+                            </td>
+                            <td>
+                                <div class="fw-bold">@item.Name</div>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a asp-area="Admin" asp-controller="Category" asp-action="Display" asp-route-id="@item.Id" 
+                                       class="btn btn-outline-primary" title="Xem chi ti?t">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-area="Admin" asp-controller="Category" asp-action="Update" asp-route-id="@item.Id" 
+                                       class="btn btn-outline-warning" title="Ch?nh s?a">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-area="Admin" asp-controller="Category" asp-action="Delete" asp-route-id="@item.Id" 
+                                       class="btn btn-outline-danger" title="Xóa"
+                                       onclick="return confirm('B?n có ch?c mu?n xóa danh m?c này?');">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,5 +1,6 @@
+@using TINH_FINAL_2256.Extensions
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
 <head>
     <meta charset="utf-8" />
@@ -14,58 +15,154 @@
 
 <body>
     <header>
-        <!-- Unified single header (red) -->
-        <div class="top-header bg-danger text-white py-3">
-            <div class="container d-flex align-items-center gap-3">
-                <a class="text-white text-decoration-none fw-bold fs-4 me-3" asp-area="" asp-controller="Home"
-                    asp-action="Index">3TLH Phone</a>
-
-                <!-- Navigation links (moved into single header) -->
-                <ul class="nav me-3 d-none d-md-flex">
-                    <li class="nav-item"><a class="nav-link text-white px-2" asp-area="" asp-controller="Home"
-                            asp-action="Index">Trang chủ</a></li>
-                    <li class="nav-item"><a class="nav-link text-white px-2" asp-area="" asp-controller="Product"
-                            asp-action="Index">Sản phẩm</a></li>
-                </ul>
-
-                <!-- Search form -->
-                <form asp-controller="Product" asp-action="Index" method="get" class="flex-grow-1">
-                    <div class="input-group">
-                        <input type="search" name="q" class="form-control top-search-input"
-                            placeholder="Nhập tên điện thoại, laptop, phụ kiện..." value="@Context.Request.Query["q"]"
-                            aria-label="Search" />
-                        <button class="btn btn-light" type="submit"><i class="bi-search"></i> Tìm</button>
+        <!-- Modern Professional Header -->
+        <div class="top-header" style="padding: 0.6rem 0;">
+            <div class="container" style="padding: 0 15px;">
+                <div class="row align-items-center g-2" style="margin: 0;">
+                    <!-- Logo -->
+                    <div class="col-auto">
+                        <a class="text-white text-decoration-none fw-bold" style="font-size: 1.3rem;" 
+                            asp-area="" asp-controller="Home" asp-action="Index">
+                            <i class="bi bi-phone me-2"></i>3TLH Phone
+                        </a>
                     </div>
-                </form>
 
-                <div class="d-flex align-items-center gap-2 ms-3">
-                    <partial name="_LoginPartial" />
-                    <a asp-controller="ShoppingCart" asp-action="Index" class="btn btn-dark btn-sm">
-                        <i class="bi-cart-fill me-1"></i>
-                        Giỏ hàng
-                    </a>
+                    <!-- Navigation links -->
+                    <div class="col d-none d-md-block">
+                        <ul class="nav gap-1" style="margin: 0;">
+                            <li class="nav-item">
+                                <a class="nav-link text-white" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;" 
+                                   asp-area="" asp-controller="Home" asp-action="Index">
+                                    <i class="bi bi-house me-1"></i>Trang chủ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;" 
+                                   asp-area="" asp-controller="Product" asp-action="Index">
+                                    <i class="bi bi-box me-1"></i>Sản phẩm
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Search form -->
+                    <div class="col-12 col-md-auto flex-md-grow-1" style="padding: 0;">
+                        <form asp-controller="Product" asp-action="Index" method="get" class="w-100">
+                            <div class="input-group input-group-sm">
+                                <input type="search" name="q" class="form-control top-search-input"
+                                    placeholder="Tìm điện thoại..." 
+                                    value="@Context.Request.Query["q"]" 
+                                    aria-label="Search"
+                                    style="padding: 0.5rem 0.8rem; font-size: 0.9rem;" />
+                                <button class="btn btn-light" type="submit" style="padding: 0.5rem 0.8rem;">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- User Actions -->
+                    <div class="col-auto d-flex align-items-center gap-2">
+                        <partial name="_LoginPartial" />
+                    </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <div class="container">
-        <main role="main" class="pb-3">
+    <!-- Cart Modal placed at root level to avoid nested dropdown/modal issues -->
+    <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-end modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cartModalLabel">
+                        <i class="bi bi-cart3 me-2"></i>Giỏ hàng & Đơn hàng
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="cartSummaryContainer">
+                        @Html.Partial("_CartSummaryPartial", Context.Session.GetObjectFromJson<TINH_FINAL_2256.Models.ShoppingCart>("Cart") ?? new TINH_FINAL_2256.Models.ShoppingCart())
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="margin-top: 2rem; margin-bottom: 2rem;">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
 
-    <!-- Link to contact page instead of mailto to avoid client-side issues -->
-    <a class="contact-btn" asp-controller="Contact" asp-action="Index" role="button" aria-label="Liên hệ"> <i class="bi bi-headset"></i> Liên hệ</a>
+    <!-- Contact Floating Button -->
+    <a class="contact-btn" asp-controller="Contact" asp-action="Index" role="button" aria-label="Liên hệ"> 
+        <i class="bi bi-headset"></i> 
+        <span class="d-none d-sm-inline">Liên hệ</span>
+    </a>
 
-    <footer class="border-top footer text-muted">
+    <!-- Footer -->
+    <footer class="footer">
         <div class="container">
-            &copy; @DateTime.Now.Year - 3TLH Phone
+            <div class="row">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <h6 class="fw-bold mb-2" style="font-size: 1rem;">3TLH Phone</h6>
+                    <p class="small text-secondary mb-0">Cửa hàng bán điện thoại, laptop và phụ kiện chính hãng</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="small text-secondary mb-0">
+                        &copy; @DateTime.Now.Year 3TLH Phone. Tất cả các quyền được bảo lưu.
+                    </p>
+                </div>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var cartModal = document.getElementById('cartModal');
+            if (!cartModal) return;
+
+            var isAuthenticated = @((User.Identity?.IsAuthenticated ?? false).ToString().ToLower());
+
+            cartModal.addEventListener('shown.bs.modal', function () {
+                // refresh cart summary via AJAX to reflect session changes
+                fetch('@Url.Action("CartSummary", "ShoppingCart")')
+                    .then(function (res) { return res.text(); })
+                    .then(function (html) {
+                        var container = document.getElementById('cartSummaryContainer');
+                        if (container) container.innerHTML = html;
+                    })
+                    .catch(function (err) { console.error('Error loading cart summary', err); });
+
+                // load recent orders only for authenticated users
+                if (isAuthenticated) {
+                    fetch('@Url.Action("GetRecentOrders", "ShoppingCart")')
+                        .then(function (res) { if (!res.ok) throw new Error('Unauthorized'); return res.text(); })
+                        .then(function (html) {
+                            var recent = document.getElementById('recentOrdersContainer');
+                            if (recent) recent.innerHTML = html;
+                        })
+                        .catch(function (err) {
+                            console.error('Error loading recent orders', err);
+                            var recent = document.getElementById('recentOrdersContainer');
+                            if (recent) recent.innerHTML = '<p class="text-danger">Lỗi tải đơn hàng</p>';
+                        });
+                }
+            });
+
+            // Clean up when modal hidden (remove leftover backdrops if any)
+            cartModal.addEventListener('hidden.bs.modal', function () {
+                // remove any stray modal-backdrop
+                document.querySelectorAll('.modal-backdrop').forEach(function (el) { el.remove(); });
+            });
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

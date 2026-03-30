@@ -1,0 +1,38 @@
+﻿@model IEnumerable<TINH_FINAL_2256.Models.Order>
+
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+}
+
+<h2 class="mb-3">Đơn hàng đã đặt</h2>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info">Bạn chưa có đơn hàng nào.</div>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var order in Model)
+        {
+            <div class="list-group-item d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="fw-bold">Đơn hàng #@order.Id</div>
+                    <div class="small text-secondary">Ngày: @order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</div>
+                    <div class="small text-secondary">Tổng: @order.TotalPrice.ToString("#,##0") ?</div>
+                    <div class="small mt-1">Trạng thái: <span class="fw-bold">@order.Status</span></div>
+                </div>
+                <div class="d-flex flex-column align-items-end gap-2">
+                    <a asp-action="OrderDetails" asp-route-id="@order.Id" class="btn btn-sm btn-outline-primary">Xem</a>
+                    @if (order.Status != "Shipped" && order.Status != "Delivered" && order.Status != "Cancelled")
+                    {
+                        <form asp-action="CancelOrder" method="post">
+                            <input type="hidden" name="id" value="@order.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc muốn hủy đơn này?');">Hủy</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}

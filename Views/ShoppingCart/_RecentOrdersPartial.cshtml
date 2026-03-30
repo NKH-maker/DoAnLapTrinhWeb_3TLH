@@ -1,0 +1,67 @@
+﻿@model List<TINH_FINAL_2256.Models.Order>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="text-center text-secondary py-3">
+        <p class="small">Chưa có đơn hàng nào</p>
+    </div>
+}
+else
+{
+    <div class="list-group list-group-sm">
+        @foreach (var order in Model)
+        {
+            var statusBadgeClass = order.Status switch
+            {
+                "Pending" => "bg-warning",
+                "Processing" => "bg-info",
+                "Shipped" => "bg-primary",
+                "Delivered" => "bg-success",
+                "Cancelled" => "bg-danger",
+                _ => "bg-secondary"
+            };
+
+            var statusText = order.Status switch
+            {
+                "Pending" => "Chờ xử lý",
+                "Processing" => "Đang xử lý",
+                "Shipped" => "Đang giao",
+                "Delivered" => "Đã giao",
+                "Cancelled" => "Đã hủy",
+                _ => order.Status
+            };
+
+            <a href="@Url.Action("OrderDetails", "ShoppingCart", new { id = order.Id })" 
+               class="list-group-item list-group-item-action" 
+               data-bs-dismiss="modal">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div style="flex: 1;">
+                        <h6 class="mb-1 fw-bold text-dark" style="font-size: 0.85rem;">
+                            ??n #@order.Id
+                        </h6>
+                        <p class="mb-1 small text-secondary">
+                            @order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                        </p>
+                        <p class="mb-0 small text-secondary">
+                            @order.OrderDetails?.Count() sản phẩm
+                        </p>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold text-danger mb-1" style="font-size: 0.85rem;">
+                            @order.TotalPrice.ToString("#,##0") ?
+                        </div>
+                        <span class="badge @statusBadgeClass" style="font-size: 0.7rem;">
+                            @statusText
+                        </span>
+                    </div>
+                </div>
+            </a>
+        }
+    </div>
+
+    <div class="mt-2">
+        <a asp-controller="ShoppingCart" asp-action="MyOrders" class="btn btn-sm btn-outline-secondary w-100" data-bs-dismiss="modal">
+            <i class="bi bi-list me-1"></i>Xem tất cả đơn hàng
+        </a>
+    </div>
+}
