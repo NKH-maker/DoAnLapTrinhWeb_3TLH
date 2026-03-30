@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TINH_FINAL_2256.Extensions;
-using TINH_FINAL_2256.Repositories;
 using TINH_FINAL_2256.Models;
+using TINH_FINAL_2256.Repositories;
 
 namespace TINH_FINAL_2256.Controllers
 {
@@ -288,6 +289,17 @@ namespace TINH_FINAL_2256.Controllers
         {
             var cart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart") ?? new ShoppingCart();
             return PartialView("_CartSummaryPartial", cart);
+        }
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAdminOrdersPartial()
+        {
+            var orders = await _context.Orders
+                .Include(o => o.ApplicationUser)
+                .OrderByDescending(o => o.OrderDate)
+                .Take(10)
+                .ToListAsync();
+
+            return PartialView("_AdminOrdersPartial", orders);
         }
     }
 }

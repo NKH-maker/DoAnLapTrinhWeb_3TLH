@@ -81,9 +81,20 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="cartSummaryContainer">
-                        @Html.Partial("_CartSummaryPartial", Context.Session.GetObjectFromJson<TINH_FINAL_2256.Models.ShoppingCart>("Cart") ?? new TINH_FINAL_2256.Models.ShoppingCart())
-                    </div>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <div id="adminOrdersContainer">
+                            <p class="text-center">Đang tải đơn hàng khách hàng...</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div id="cartSummaryContainer">
+                            @Html.Partial("_CartSummaryPartial", Context.Session.GetObjectFromJson<TINH_FINAL_2256.Models.ShoppingCart>("Cart") ?? new TINH_FINAL_2256.Models.ShoppingCart())
+                        </div>
+                        <hr />
+                        <div id="recentOrdersContainer"></div>
+                    }
                 </div>
             </div>
         </div>
