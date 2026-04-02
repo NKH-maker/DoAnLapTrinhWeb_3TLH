@@ -10,6 +10,7 @@ using TINH_FINAL_2256.Services;
 using TINH_FINAL_2256.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using System.Text.Json;
+using System.Security.Claims;
 
 namespace TINH_FINAL_2256.Controllers
 {
@@ -26,6 +27,7 @@ namespace TINH_FINAL_2256.Controllers
         private readonly IDistributedCache _cache;
         private readonly IHubContext<NotificationHub> _hubContext;
         private readonly ILogger<ShoppingCartController> _logger;
+        private readonly IEmailTemplateService _emailTemplateService;
 
         public ShoppingCartController(
             ApplicationDbContext context,
@@ -38,7 +40,8 @@ namespace TINH_FINAL_2256.Controllers
             IExcelService excelService,
             IDistributedCache cache,
             IHubContext<NotificationHub> hubContext,
-            ILogger<ShoppingCartController> logger)
+            ILogger<ShoppingCartController> logger,
+            IEmailTemplateService emailTemplateService)
         {
             _productRepository = productRepository;
             _context = context;
@@ -51,6 +54,7 @@ namespace TINH_FINAL_2256.Controllers
             _cache = cache;
             _hubContext = hubContext;
             _logger = logger;
+            _emailTemplateService = emailTemplateService;
         }
 
         public async Task<IActionResult> AddToCart(int productId, int quantity)
@@ -169,29 +173,43 @@ namespace TINH_FINAL_2256.Controllers
         }
 
         // GET: Checkout - prefill info for logged-in users
+        [Authorize]
         public async Task<IActionResult> Checkout()
         {
-            var order = new Order();
             var user = await _userManager.GetUserAsync(User);
-            if (user != null)
+            if (user == null)
             {
-                order.PhoneNumber = user.PhoneNumber;
-                order.ShippingAddress = user.Address ?? string.Empty;
+                return Challenge();
             }
+
+            var order = new Order
+            {
+                PhoneNumber = user.PhoneNumber,
+                ShippingAddress = user.Address ?? string.Empty
+            };
+
             return View(order);
         }
 
         // POST: Checkout
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Checkout(Order order)
         {
             try
             {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Challenge();
+                }
+
                 var cart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart");
 
                 if (cart == null || !cart.Items.Any())
                 {
+                    TempData["ErrorMessage"] = "Gi? hàng r?ng.";
                     return RedirectToAction("Index");
                 }
 
@@ -201,9 +219,7 @@ namespace TINH_FINAL_2256.Controllers
                     return View(order);
                 }
 
-                var user = await _userManager.GetUserAsync(User);
-
-                order.UserId = user?.Id ?? string.Empty;
+                order.UserId = user.Id;
                 order.OrderDate = DateTime.UtcNow;
                 order.TotalPrice = cart.Items.Sum(i => i.Price * i.Quantity);
 
@@ -225,34 +241,35 @@ namespace TINH_FINAL_2256.Controllers
 
                 _logger.LogInformation("Order created: {OrderId} by user {UserId}", order.Id, user?.Id);
 
-                // ?? G?i order confirmation email b?t ??ng b? qua Hangfire
+                // G?i order confirmation email b?t ??ng b? qua Hangfire
                 var subject = "Xác Nh?n ??n Hàng";
-                var body = $@"
-                    <h2>C?m ?n b?n ?ã ??t hàng!</h2>
-                    <p>Mã ??n hàng: <strong>{order.Id}</strong></p>
-                    <p>Ngày ??t: {order.OrderDate:dd/MM/yyyy HH:mm}</p>
-                    <p>T?ng ti?n: <strong>{order.TotalPrice:C}</strong></p>
-                    <p><a href='{Request.Scheme}://{Request.Host}/ShoppingCart/OrderDetails/{order.Id}'>Xem chi ti?t ??n hàng</a></p>
-                ";
-                
+                var body = _emailTemplateService.GetOrderConfirmationTemplate(
+                    user?.FullName ?? "Khách hàng",
+                    order.Id,
+                    order.TotalPrice,
+                    order.OrderDate);
+
                 _backgroundJobService.ScheduleEmailJob(
-                    user?.Email ?? order.PhoneNumber, 
-                    subject, 
-                    body, 
+                    user?.Email ?? order.PhoneNumber,
+                    subject,
+                    body,
                     TimeSpan.FromSeconds(5));
 
-                // ?? G?i notification qua RabbitMQ
+                // Publish notifications (no-op if MQ disabled)
                 _messageQueueService.PublishOrderNotification(
-                    order.Id.ToString(), 
+                    order.Id.ToString(),
                     $"Order {order.Id} created successfully - Total: {order.TotalPrice:C}");
 
-                // ?? G?i real-time notification qua SignalR
                 await _hubContext.Clients.All.SendAsync(
-                    "ReceiveOrderNotification", 
-                    order.Id.ToString(), 
+                    "ReceiveOrderNotification",
+                    order.Id.ToString(),
                     $"New Order #{order.Id} - {order.TotalPrice:C}");
 
                 _logger.LogInformation("Order notifications sent for order {OrderId}", order.Id);
+
+                // Clear cache và session
+                await _cache.RemoveAsync($"user_orders_{user.Id}");
+                HttpContext.Session.Remove("Cart");
 
                 return RedirectToAction(nameof(Payment), new { id = order.Id });
             }
@@ -349,7 +366,23 @@ namespace TINH_FINAL_2256.Controllers
 
                 if (order == null) return NotFound();
 
-                // ?? T?o QR code cho order
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null && User.Identity?.IsAuthenticated == true)
+                {
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+                    if (!string.IsNullOrEmpty(userId)) user = await _userManager.FindByIdAsync(userId);
+                }
+
+                // Only allow owner or admin to view
+                if (!User.IsInRole(SD.Role_Admin))
+                {
+                    if (user == null || order.UserId != user.Id)
+                    {
+                        return Forbid();
+                    }
+                }
+
+                // Create QR code for order
                 var qrCodeData = $"{Request.Scheme}://{Request.Host}/ShoppingCart/OrderDetails/{order.Id}";
                 var qrCodeBase64 = _qrCodeService.GenerateQRCodeBase64(qrCodeData);
                 ViewData["OrderQRCode"] = qrCodeBase64;
@@ -366,11 +399,18 @@ namespace TINH_FINAL_2256.Controllers
         }
 
         // View orders for current customer with caching
+        [Authorize]
         public async Task<IActionResult> MyOrders()
         {
             try
             {
                 var user = await _userManager.GetUserAsync(User);
+                if (user == null && User.Identity?.IsAuthenticated == true)
+                {
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+                    if (!string.IsNullOrEmpty(userId)) user = await _userManager.FindByIdAsync(userId);
+                }
+
                 if (user == null) return Challenge();
 
                 // Ki?m tra cache
@@ -378,17 +418,19 @@ namespace TINH_FINAL_2256.Controllers
                 if (!string.IsNullOrEmpty(cachedOrders))
                 {
                     _logger.LogInformation("User orders loaded from cache for user {UserId}", user.Id);
-                    // Cache hit - có th? dùng nh?ng v?n l?y fresh data d??i
+                    // Note: still fetch fresh data below to ensure details populated
                 }
 
                 var orders = await _context.Orders
                     .Where(o => o.UserId == user.Id)
+                    .Include(o => o.ApplicationUser)
                     .Include(o => o.OrderDetails)
                         .ThenInclude(od => od.Product)
                     .OrderByDescending(o => o.OrderDate)
+                    .AsNoTracking()
                     .ToListAsync();
 
-                // Cache orders cho 10 phút
+                // Cache orders cho 10 phút (serialize minimal DTO if necessary)
                 await _cache.SetStringAsync($"user_orders_{user.Id}", 
                     JsonSerializer.Serialize(orders),
                     new DistributedCacheEntryOptions 
@@ -408,11 +450,18 @@ namespace TINH_FINAL_2256.Controllers
         }
 
         // Get recent orders for cart modal (AJAX endpoint)
+        [Authorize]
         public async Task<IActionResult> GetRecentOrders()
         {
             try
             {
                 var user = await _userManager.GetUserAsync(User);
+                if (user == null && User.Identity?.IsAuthenticated == true)
+                {
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+                    if (!string.IsNullOrEmpty(userId)) user = await _userManager.FindByIdAsync(userId);
+                }
+
                 if (user == null) return Unauthorized();
 
                 var orders = await _context.Orders

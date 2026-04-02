@@ -4,55 +4,108 @@
     ViewData["Title"] = "Đăng ký";
 }
 
-<div class="auth-card">
-    <h3 class="mb-3 text-center">@ViewData["Title"]</h3>
-    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-2" role="alert"></div>
-        <div class="form-floating mb-3">
-            <input asp-for="Input.FullName" class="form-control" placeholder="Họ tên" />
-            <label asp-for="Input.FullName">Họ tên</label>
-            <span asp-validation-for="Input.FullName" class="text-danger"></span>
-        </div>
-        <div class="form-floating mb-3">
-            <input asp-for="Input.Email" class="form-control" autocomplete="username" placeholder="Email" />
-            <label asp-for="Input.Email">Email</label>
-            <span asp-validation-for="Input.Email" class="text-danger"></span>
-        </div>
-        <div class="form-floating mb-3">
-            <input asp-for="Input.Password" class="form-control" autocomplete="new-password" placeholder="Mật khẩu" />
-            <label asp-for="Input.Password">Mật khẩu</label>
-            <span asp-validation-for="Input.Password" class="text-danger"></span>
-        </div>
-        <div class="form-floating mb-3">
-            <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" placeholder="Xác nhận mật khẩu" />
-            <label asp-for="Input.ConfirmPassword">Xác nhận mật khẩu</label>
-            <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-        </div>
-        <div class="form-floating mb-3">
-            <input asp-for="Input.Address" class="form-control" placeholder="Địa chỉ" />
-            <label asp-for="Input.Address">Địa chỉ</label>
-            <span asp-validation-for="Input.Address" class="text-danger"></span>
-        </div>
-        <div class="form-floating mb-3">
-            <input asp-for="Input.Age" class="form-control" placeholder="Tuổi" />
-            <label asp-for="Input.Age">Tuổi</label>
-            <span asp-validation-for="Input.Age" class="text-danger"></span>
-        </div>
-        @if (Model.RoleList != null && Model.RoleList.Any())
-        {
-            <div class="form-floating mb-3">
-                <select asp-for="Input.Role" asp-items="@Model.RoleList" class="form-select">
-                    <option disabled selected>--Chọn vai trò--</option>
-                </select>
-                <label asp-for="Input.Role">Vai trò</label>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h3 class="mb-3 text-center">@ViewData["Title"]</h3>
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                    }
+
+                    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="needs-validation">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-2" role="alert"></div>
+                        <div class="mb-3">
+                            <label asp-for="Input.FullName" class="form-label">Họ tên</label>
+                            <input asp-for="Input.FullName" class="form-control" placeholder="Họ tên" />
+                            <span asp-validation-for="Input.FullName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Email" class="form-label">Email</label>
+                            <input asp-for="Input.Email" class="form-control" autocomplete="username" placeholder="Email" />
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3 position-relative">
+                            <label asp-for="Input.Password" class="form-label">Mật khẩu</label>
+                            <input asp-for="Input.Password" class="form-control" autocomplete="new-password" placeholder="Mật khẩu" id="Input_Password" />
+                            <button type="button" id="togglePassword" class="btn btn-sm btn-outline-secondary" style="position:absolute;right:10px;top:36px;">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3 position-relative">
+                            <label asp-for="Input.ConfirmPassword" class="form-label">Xác nhận mật khẩu</label>
+                            <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" placeholder="Xác nhận mật khẩu" />
+                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Address" class="form-label">Địa chỉ</label>
+                            <input asp-for="Input.Address" class="form-control" placeholder="Địa chỉ" />
+                            <span asp-validation-for="Input.Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Age" class="form-label">Tuổi</label>
+                            <input asp-for="Input.Age" class="form-control" placeholder="Tuổi" />
+                            <span asp-validation-for="Input.Age" class="text-danger"></span>
+                        </div>
+
+                        @if (Model.RoleList != null && Model.RoleList.Any())
+                        {
+                            <div class="mb-3">
+                                <label asp-for="Input.Role" class="form-label">Vai trò</label>
+                                <select asp-for="Input.Role" asp-items="@Model.RoleList" class="form-select">
+                                    <option disabled selected>--Chọn vai trò--</option>
+                                </select>
+                            </div>
+                        }
+
+                        <div class="d-grid">
+                            <button id="registerSubmit" type="submit" class="btn btn-primary btn-lg">Đăng ký</button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <a asp-page="./Login" class="text-primary">Đã có tài khoản? Đăng nhập</a>
+                    </div>
+                </div>
             </div>
-        }
-        <div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Đăng ký</button>
         </div>
-    </form>
+    </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggle = document.getElementById('togglePassword');
+            const pwd = document.getElementById('Input_Password');
+            if (toggle && pwd) {
+                toggle.addEventListener('click', function () {
+                    const isPwd = pwd.type === 'password';
+                    pwd.type = isPwd ? 'text' : 'password';
+                    toggle.innerHTML = isPwd ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+                });
+            }
+
+            // Form validation
+            const form = document.getElementById('registerForm');
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    if (!form.checkValidity()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                });
+            }
+        });
+    </script>
 }

@@ -32,16 +32,16 @@
                         </div>
                         <div class="ms-2" style="flex:1;">
                             <div class="fw-semibold text-dark small">@item.Name</div>
-                            <div class="small text-secondary">x@item.Quantity • @item.Price.ToString("#,##0") ?</div>
+                            <div class="small text-secondary">x@item.Quantity • @item.Price.ToString("#,##0") đ</div>
                         </div>
-                        <div class="text-end ms-2 fw-semibold text-danger small">@((item.Price*item.Quantity).ToString("#,##0")) ?</div>
+                        <div class="text-end ms-2 fw-semibold text-danger small">@((item.Price*item.Quantity).ToString("#,##0")) đ</div>
                     </li>
                 }
             </ul>
 
             <div class="d-flex justify-content-between fw-bold mb-3">
                 <div>Tạm tính</div>
-                <div>@Model.Items.Sum(i => i.Price * i.Quantity).ToString("#,##0") ?</div>
+                <div>@Model.Items.Sum(i => i.Price * i.Quantity).ToString("#,##0") đ</div>
             </div>
 
             <div class="d-grid gap-2 mb-3">
@@ -63,12 +63,13 @@
                 <i class="bi bi-card-list me-2"></i>Đơn hàng gần Đây
             </h6>
 
-            <!-- Load orders via AJAX or partial -->
-            <div id="recentOrdersContainer">
+            <!-- Placeholder for recent orders - loaded by _Layout.cshtml script -->
+            <div id="recentOrdersContainer" style="max-height: 400px; overflow-y: auto;">
                 <div class="text-center py-3">
-                    <div class="spinner-border spinner-border-sm" role="status">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
+                    <small class="text-muted d-block mt-2">Đang tải...</small>
                 </div>
             </div>
         }

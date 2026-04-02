@@ -1,21 +1,18 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using Hangfire;
 using Hangfire.SqlServer;
+using Hangfire.Dashboard;
 using Serilog;
-using System.Text;
 using TINH_FINAL_2256.Models;
 using TINH_FINAL_2256.Repositories;
 using TINH_FINAL_2256.Services;
 using TINH_FINAL_2256.Hubs;
 
-// C?u hình Serilog
+// Configure Serilog (console only to reduce file I/O during development)
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
+    .MinimumLevel.Information()
     .WriteTo.Console()
-    .WriteTo.File("logs/app-.txt", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,14 +22,17 @@ try
     // Serilog
     builder.Host.UseSerilog();
 
-    // Distributed Memory Cache
+    // Distributed Memory Cache (use in development)
     builder.Services.AddDistributedMemoryCache();
 
-    // Redis Caching
-    builder.Services.AddStackExchangeRedisCache(options =>
+    // Redis Caching - enable only in Production to avoid extra connection overhead during development
+    if (builder.Environment.IsProduction())
     {
-        options.Configuration = builder.Configuration.GetConnectionString("RedisConnection") ?? "localhost:6379";
-    });
+        builder.Services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = builder.Configuration.GetConnectionString("RedisConnection") ?? "localhost:6379";
+        });
+    }
 
     // Session
     builder.Services.AddSession(options =>
@@ -64,55 +64,22 @@ try
         options.AccessDeniedPath = "/Account/AccessDenied";
     });
 
-    // JWT Authentication
-    var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-    var jwtKey = jwtSettings["Key"] ?? "your-default-secret-key-min-32-characters";
-    builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
+    // External providers (Google) - keep social login support without adding JwtBearer middleware
+    builder.Services.AddAuthentication()
+        .AddGoogle(options =>
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
-        };
-    })
-    // OAuth Google
-    .AddGoogle(options =>
-    {
-        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "";
-        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "";
-    });
+            options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "";
+            options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "";
+        });
 
-    // RabbitMQ
-    builder.Services.AddSingleton<RabbitMQ.Client.IConnectionFactory>(sp =>
-    {
-        var factory = new RabbitMQ.Client.ConnectionFactory()
-        {
-            HostName = builder.Configuration["RabbitMQ:HostName"] ?? "localhost",
-            Port = int.TryParse(builder.Configuration["RabbitMQ:Port"], out var port) ? port : 5672,
-            UserName = builder.Configuration["RabbitMQ:UserName"] ?? "guest",
-            Password = builder.Configuration["RabbitMQ:Password"] ?? "guest",
-            DispatchConsumersAsync = true
-        };
-        return factory;
-    });
-
-    // Hangfire
+    // Hangfire (background jobs) - keep for reliable internal scheduling
     builder.Services.AddHangfire(configuration =>
     {
         configuration.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"));
     });
     builder.Services.AddHangfireServer();
 
-    // SignalR
+    // SignalR (real-time) - keep for real-time notifications and chat
     builder.Services.AddSignalR();
 
     // Repositories
@@ -121,10 +88,15 @@ try
 
     // Services
     builder.Services.AddScoped<IEmailService, EmailService>();
-    builder.Services.AddScoped<IMessageQueueService, RabbitMQService>();
+    // Replace RabbitMQ-backed IMessageQueueService with a lightweight null implementation to avoid external MQ dependency
+    builder.Services.AddScoped<IMessageQueueService, NullMessageQueueService>();
     builder.Services.AddScoped<IBackgroundJobService, BackgroundJobService>();
     builder.Services.AddScoped<IQRCodeService, QRCodeService>();
     builder.Services.AddScoped<IExcelService, ExcelService>();
+    builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+
+    // Hangfire dashboard authorization filter registration
+    builder.Services.AddSingleton<IDashboardAuthorizationFilter, HangfireAuthorizationFilter>();
 
     var app = builder.Build();
 
@@ -142,6 +114,17 @@ try
         }
     }
 
+    // Seed sample data (orders)
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>();
+        
+        var seeder = new TINH_FINAL_2256.Services.DataSeeder(context, userManager, logger);
+        await seeder.SeedSampleOrdersAsync();
+    }
+
     // Middleware
     if (!app.Environment.IsDevelopment())
     {
@@ -154,8 +137,12 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
 
-    // Hangfire Dashboard
-    app.UseHangfireDashboard();
+    // Hangfire Dashboard - protected by authorization filter
+    var dashAuth = app.Services.GetRequiredService<IDashboardAuthorizationFilter>();
+    app.UseHangfireDashboard(builder.Configuration["Hangfire:DashboardPath"] ?? "/hangfire", new DashboardOptions
+    {
+        Authorization = new[] { dashAuth }
+    });
 
     // Routes
     app.MapControllerRoute(
@@ -167,7 +154,6 @@ try
     app.MapRazorPages();
 
     // SignalR Hubs
-    // app.MapHub<YourHub>("/hub/yourHub");
     app.MapHub<NotificationHub>("/hub/notifications");
 
     app.Run();

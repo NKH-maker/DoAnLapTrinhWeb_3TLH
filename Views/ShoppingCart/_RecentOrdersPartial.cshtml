@@ -2,29 +2,43 @@
 
 @if (Model == null || !Model.Any())
 {
-    <div class="text-center text-secondary py-3">
-        <p class="small">Chưa có đơn hàng nào</p>
+    <div class="text-center text-secondary py-4">
+        <i class="bi bi-inbox" style="font-size: 1.5rem;"></i>
+        <p class="small mt-2 mb-0">Chưa có đơn hàng nào</p>
     </div>
 }
 else
 {
-    <div class="list-group list-group-sm">
-        @foreach (var order in Model)
+    <div class="list-group list-group-sm" style="max-height: 400px; overflow-y: auto;">
+        @foreach (var order in Model.OrderByDescending(o => o.OrderDate).Take(10))
         {
             var statusBadgeClass = order.Status switch
             {
                 "Pending" => "bg-warning",
                 "Processing" => "bg-info",
+                "Paid" => "bg-success",
                 "Shipped" => "bg-primary",
                 "Delivered" => "bg-success",
                 "Cancelled" => "bg-danger",
                 _ => "bg-secondary"
             };
 
+            var statusIcon = order.Status switch
+            {
+                "Pending" => "⏳",
+                "Processing" => "⚙️",
+                "Paid" => "✅",
+                "Shipped" => "🚚",
+                "Delivered" => "✔️",
+                "Cancelled" => "❌",
+                _ => "❓"
+            };
+
             var statusText = order.Status switch
             {
                 "Pending" => "Chờ xử lý",
                 "Processing" => "Đang xử lý",
+                "Paid" => "Đã thanh toán",
                 "Shipped" => "Đang giao",
                 "Delivered" => "Đã giao",
                 "Cancelled" => "Đã hủy",
@@ -32,26 +46,26 @@ else
             };
 
             <a href="@Url.Action("OrderDetails", "ShoppingCart", new { id = order.Id })" 
-               class="list-group-item list-group-item-action" 
+               class="list-group-item list-group-item-action p-3 text-decoration-none" 
                data-bs-dismiss="modal">
                 <div class="d-flex justify-content-between align-items-start">
                     <div style="flex: 1;">
-                        <h6 class="mb-1 fw-bold text-dark" style="font-size: 0.85rem;">
-                            Đơn #@order.Id
+                        <h6 class="mb-1 fw-bold text-dark d-flex align-items-center">
+                            <i class="bi bi-receipt me-1"></i>Đơn #@order.Id
                         </h6>
                         <p class="mb-1 small text-secondary">
-                            @order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                            <i class="bi bi-calendar3 me-1"></i>@order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
                         </p>
                         <p class="mb-0 small text-secondary">
-                            @order.OrderDetails?.Count() sản phẩm
+                            <i class="bi bi-bag me-1"></i>@(order.OrderDetails?.Count ?? 0) sản phẩm
                         </p>
                     </div>
-                    <div class="text-end">
-                        <div class="fw-bold text-danger mb-1" style="font-size: 0.85rem;">
-                            @order.TotalPrice.ToString("#,##0") Vnđ
+                    <div class="text-end" style="min-width: 100px;">
+                        <div class="fw-bold text-danger mb-2" style="font-size: 0.90rem;">
+                            @order.TotalPrice.ToString("#,##0") đ
                         </div>
-                        <span class="badge @statusBadgeClass" style="font-size: 0.7rem;">
-                            @statusText
+                        <span class="badge @statusBadgeClass" style="font-size: 0.70rem; white-space: normal;">
+                            @statusIcon @statusText
                         </span>
                     </div>
                 </div>
@@ -59,8 +73,8 @@ else
         }
     </div>
 
-    <div class="mt-2">
-        <a asp-controller="ShoppingCart" asp-action="MyOrders" class="btn btn-sm btn-outline-secondary w-100" data-bs-dismiss="modal">
+    <div class="mt-3 border-top pt-3">
+        <a asp-controller="ShoppingCart" asp-action="MyOrders" class="btn btn-sm btn-outline-primary w-100" data-bs-dismiss="modal">
             <i class="bi bi-list me-1"></i>Xem tất cả đơn hàng
         </a>
     </div>

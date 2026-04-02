@@ -1,0 +1,19 @@
+@page
+@model TINH_FINAL_2256.Areas.Identity.Pages.Account.ConfirmEmailModel
+@{
+    ViewData["Title"] = "Xác th?c Email";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4 text-center">
+                    <h4 class="mb-3">Xác th?c Email</h4>
+                    <p class="mb-3">@Model.StatusMessage</p>
+                    <a asp-page="/Account/Login" class="btn btn-primary">Quay l?i ??ng nh?p</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -139,30 +139,56 @@
             if (!cartModal) return;
 
             var isAuthenticated = @((User.Identity?.IsAuthenticated ?? false).ToString().ToLower());
+            var isAdmin = @((User?.IsInRole("Admin") ?? false).ToString().ToLower());
 
             cartModal.addEventListener('shown.bs.modal', function () {
-                // refresh cart summary via AJAX to reflect session changes
-                fetch('@Url.Action("CartSummary", "ShoppingCart")')
-                    .then(function (res) { return res.text(); })
-                    .then(function (html) {
-                        var container = document.getElementById('cartSummaryContainer');
-                        if (container) container.innerHTML = html;
-                    })
-                    .catch(function (err) { console.error('Error loading cart summary', err); });
+                if (isAdmin) {
+                    // Clear non-admin containers if present
+                    var cartContainer = document.getElementById('cartSummaryContainer');
+                    if (cartContainer) cartContainer.innerHTML = '';
+                    var recent = document.getElementById('recentOrdersContainer');
+                    if (recent) recent.innerHTML = '';
 
-                // load recent orders only for authenticated users
-                if (isAuthenticated) {
-                    fetch('@Url.Action("GetRecentOrders", "ShoppingCart")')
-                        .then(function (res) { if (!res.ok) throw new Error('Unauthorized'); return res.text(); })
+                    // Load admin orders partial
+                    fetch('@Url.Action("GetAdminOrdersPartial", "ShoppingCart")')
+                        .then(function (res) { return res.text(); })
                         .then(function (html) {
-                            var recent = document.getElementById('recentOrdersContainer');
-                            if (recent) recent.innerHTML = html;
+                            var admin = document.getElementById('adminOrdersContainer');
+                            if (admin) admin.innerHTML = html;
                         })
                         .catch(function (err) {
-                            console.error('Error loading recent orders', err);
-                            var recent = document.getElementById('recentOrdersContainer');
-                            if (recent) recent.innerHTML = '<p class="text-danger">Lỗi tải đơn hàng</p>';
+                            console.error('Error loading admin orders', err);
+                            var admin = document.getElementById('adminOrdersContainer');
+                            if (admin) admin.innerHTML = '<p class="text-danger">Lỗi tải đơn hàng</p>';
                         });
+                } else {
+                    // Clear admin container if present
+                    var admin = document.getElementById('adminOrdersContainer');
+                    if (admin) admin.innerHTML = '';
+
+                    // refresh cart summary via AJAX to reflect session changes
+                    fetch('@Url.Action("CartSummary", "ShoppingCart")')
+                        .then(function (res) { return res.text(); })
+                        .then(function (html) {
+                            var container = document.getElementById('cartSummaryContainer');
+                            if (container) container.innerHTML = html;
+                        })
+                        .catch(function (err) { console.error('Error loading cart summary', err); });
+
+                    // load recent orders only for authenticated users
+                    if (isAuthenticated) {
+                        fetch('@Url.Action("GetRecentOrders", "ShoppingCart")')
+                            .then(function (res) { if (!res.ok) throw new Error('Unauthorized'); return res.text(); })
+                            .then(function (html) {
+                                var recent = document.getElementById('recentOrdersContainer');
+                                if (recent) recent.innerHTML = html;
+                            })
+                            .catch(function (err) {
+                                console.error('Error loading recent orders', err);
+                                var recent = document.getElementById('recentOrdersContainer');
+                                if (recent) recent.innerHTML = '<p class="text-danger">Lỗi tải đơn hàng</p>';
+                            });
+                    }
                 }
             });
 

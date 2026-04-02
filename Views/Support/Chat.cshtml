@@ -1,0 +1,135 @@
+@{
+    ViewData["Title"] = "H? tr? tr?c tuy?n";
+}
+
+<link rel="stylesheet" href="~/css/chat.css" />
+
+<div class="container my-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-chat-dots"></i> H? tr? tr?c tuy?n
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Chat Messages -->
+                    <div id="chatMessages" class="chat-messages" style="height: 400px; overflow-y: auto; padding: 20px; background: #f8f9fa;">
+                        <div class="text-center text-muted">
+                            <p><i class="bi bi-chat-left-quote"></i></p>
+                            <p>B?t ??u cu?c trò chuy?n v?i chúng tôi</p>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="border-top p-3" style="background: white;">
+                        <div class="input-group">
+                            <input type="text" id="messageInput" class="form-control" placeholder="Nh?p tin nh?n..." />
+                            <button class="btn btn-primary" type="button" id="sendBtn">
+                                <i class="bi bi-send"></i> G?i
+                            </button>
+                        </div>
+                        <small class="text-muted mt-2 d-block">
+                            ?? Tip: B?n có th? nh?n v?i chúng tôi b?t c? lúc nào. Chúng tôi s? ph?n h?i trong 24 gi?.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support Info -->
+            <div class="row mt-4 g-3">
+                <div class="col-md-6">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="mb-2">?? G?i tr?c ti?p</h6>
+                            <p class="mb-0"><strong>0123 456 789</strong></p>
+                            <small class="text-muted">9AM - 9PM, Hàng ngày</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="mb-2">?? Email h? tr?</h6>
+                            <p class="mb-0"><strong>support@3tlhphone.com</strong></p>
+                            <small class="text-muted">Tr? l?i trong 24 gi?</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/signalr/signalr.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/hub/notifications")
+        .withAutomaticReconnect()
+        .build();
+
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const chatMessages = document.getElementById('chatMessages');
+
+    // K?t n?i t?i hub
+    connection.start().catch(err => {
+        console.error('SignalR connection error:', err);
+        showAlert('L?i k?t n?i. Vui lòng t?i l?i trang.', 'danger');
+    });
+
+    // Nh?n tin nh?n t? server
+    connection.on("ReceiveMessage", (user, message, timestamp) => {
+        addMessage(message, user !== 'System', timestamp);
+    });
+
+    // G?i tin nh?n
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        // G?i qua SignalR
+        connection.invoke("SendSupportMessage", message).catch(err => {
+            console.error('Error sending message:', err);
+            showAlert('Không th? g?i tin nh?n. Vui lòng th? l?i.', 'danger');
+        });
+
+        // Hi?n th? tin nh?n c?a user ngay l?p t?c
+        addMessage(message, true, new Date().toLocaleTimeString('vi-VN'));
+        messageInput.value = '';
+    }
+
+    function addMessage(content, isUser, timestamp) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user' : 'support'}`;
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+        contentDiv.textContent = content;
+
+        messageDiv.appendChild(contentDiv);
+
+        if (timestamp) {
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = typeof timestamp === 'string' ? timestamp : new Date(timestamp).toLocaleTimeString('vi-VN');
+            messageDiv.appendChild(timeDiv);
+        }
+
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+        alertDiv.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+        document.querySelector('.card:first-child').parentElement.appendChild(alertDiv);
+    }
+</script>

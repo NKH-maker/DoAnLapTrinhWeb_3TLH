@@ -1,145 +1,349 @@
-Ôªø@model TINH_FINAL_2256.Models.Order
+@model TINH_FINAL_2256.Models.Order
 
 @{
-    ViewData["Title"] = "Chi ti·∫øt ƒë∆°n h√†ng";
+    ViewData["Title"] = "Chi ti?t ??n h‡ng";
     var qrCodeBase64 = ViewData["OrderQRCode"] as string;
 }
 
-<div class="container my-4">
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-4">
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
-                <div>
-                    <h2 class="mb-1">Chi ti·∫øt ƒë∆°n h√†ng #@Model.Id</h2>
-                    <p class="text-muted mb-0">Ng√†y ƒë·∫∑t: @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
-                </div>
-                <span class="badge bg-info fs-6">@Model.Status</span>
-            </div>
-
-            <hr />
-
-            <div class="row g-3">
-                <div class="col-lg-8">
-                    <h5 class="mb-3">Chi ti·∫øt s·∫£n ph·∫©m</h5>
-                    <div class="table-responsive">
-                        <table class="table align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>S·∫£n ph·∫©m</th>
-                                    <th class="text-center">S·ªë l∆∞·ª£ng</th>
-                                    <th class="text-end">ƒê∆°n gi√°</th>
-                                    <th class="text-end">Th√†nh ti·ªÅn</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var d in Model.OrderDetails)
+<div class="container my-5">
+    <div class="row g-4">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Order Header -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+                        <div>
+                            <h2 class="mb-1 fw-bold">
+                                <i class="bi bi-receipt me-2 text-primary"></i>Chi ti?t ??n h‡ng #@Model.Id
+                            </h2>
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-calendar me-1"></i>@Model.OrderDate.ToLocalTime().ToString("dddd, dd/MM/yyyy l˙c HH:mm")
+                            </p>
+                        </div>
+                        <div class="text-center">
+                            @{
+                                var statusBadgeClass = Model.Status switch
                                 {
-                                    <tr>
-                                        <td class="fw-semibold">@d.Product?.Name</td>
-                                        <td class="text-center">@d.Quantity</td>
-                                        <td class="text-end">@d.Price.ToString("#,##0") Vnƒë</td>
-                                        <td class="text-end fw-semibold">@((d.Quantity * d.Price).ToString("#,##0")) Vnƒë</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                    "Pending" => "bg-warning",
+                                    "Processing" => "bg-info",
+                                    "Paid" => "bg-success",
+                                    "Shipped" => "bg-primary",
+                                    "Delivered" => "bg-success",
+                                    "Cancelled" => "bg-danger",
+                                    _ => "bg-secondary"
+                                };
 
-                <div class="col-lg-4">
-                    <h5 class="mb-3">Th√¥ng tin kh√°ch h√†ng</h5>
-                    <div class="card border-0 bg-light">
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="text-muted small">Email</label>
-                                <p class="mb-0 fw-semibold">@Model.ApplicationUser?.Email</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="text-muted small">S·ªë ƒëi·ªán tho·∫°i</label>
-                                <p class="mb-0 fw-semibold">@Model.PhoneNumber</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="text-muted small">ƒê·ªãa ch·ªâ giao h√†ng</label>
-                                <p class="mb-0 fw-semibold">@Model.ShippingAddress</p>
-                            </div>
-                            @if (!string.IsNullOrWhiteSpace(Model.Notes))
-                            {
-                                <div class="mb-3">
-                                    <label class="text-muted small">Ghi ch√∫</label>
-                                    <p class="mb-0 fw-semibold">@Model.Notes</p>
-                                </div>
+                                var statusIcon = Model.Status switch
+                                {
+                                    "Pending" => "?",
+                                    "Processing" => "??",
+                                    "Paid" => "?",
+                                    "Shipped" => "??",
+                                    "Delivered" => "??",
+                                    "Cancelled" => "?",
+                                    _ => "?"
+                                };
+
+                                var statusText = Model.Status switch
+                                {
+                                    "Pending" => "Ch? thanh to·n",
+                                    "Processing" => "?ang x? l˝",
+                                    "Paid" => "?„ thanh to·n",
+                                    "Shipped" => "?ang giao h‡ng",
+                                    "Delivered" => "?„ giao h‡ng",
+                                    "Cancelled" => "?„ h?y",
+                                    _ => Model.Status
+                                };
                             }
-                            <hr />
-                            <div class="d-flex justify-content-between fw-bold fs-5">
-                                <span>T·ªïng c·ªông:</span>
-                                <span>@Model.TotalPrice.ToString("#,##0") Vnƒë</span>
-                            </div>
+                            <span class="badge @statusBadgeClass fs-6 px-3 py-2">
+                                @statusIcon @statusText
+                            </span>
                         </div>
                     </div>
 
-                    <!-- üîó QR Code Tracking -->
-                    @if (!string.IsNullOrEmpty(qrCodeBase64))
-                    {
-                        <div class="card border-0 bg-light mt-3">
-                            <div class="card-body text-center">
-                                <label class="text-muted small d-block mb-2">M√£ QR theo d√µi ƒë∆°n h√†ng</label>
-                                <img src="data:image/png;base64,@qrCodeBase64" alt="Order QR Code" class="img-fluid" style="max-width: 200px;" />
+                    <!-- Order Progress Timeline -->
+                    <div class="order-timeline mt-4">
+                        <div class="row g-3 text-center">
+                            <div class="col-sm-4">
+                                <div class="@("timeline-step " + (new[] { "Pending", "Processing", "Paid", "Shipped", "Delivered" }.Contains(Model.Status) ? "completed" : ""))">
+                                    <div class="step-circle">1</div>
+                                    <p class="small mt-2 mb-0">
+                                        <strong>??n h‡ng</strong><br/>
+                                        <small class="text-muted">???c t?o</small>
+                                    </p>
+                                </div>
                             </div>
+                            <div class="col-sm-4">
+                                <div class="@("timeline-step " + (new[] { "Processing", "Paid", "Shipped", "Delivered" }.Contains(Model.Status) ? "completed" : ""))">
+                                    <div class="step-circle">2</div>
+                                    <p class="small mt-2 mb-0">
+                                        <strong>X·c nh?n</strong><br/>
+                                        <small class="text-muted">thanh to·n</small>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="@("timeline-step " + (new[] { "Shipped", "Delivered" }.Contains(Model.Status) ? "completed" : ""))">
+                                    <div class="step-circle">3</div>
+                                    <p class="small mt-2 mb-0">
+                                        <strong>Giao h‡ng</strong><br/>
+                                        <small class="text-muted">ho‡n t?t</small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bag me-2"></i>Chi ti?t s?n ph?m
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.OrderDetails != null && Model.OrderDetails.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 50%;">S?n ph?m</th>
+                                        <th class="text-center" style="width: 15%;">S? l??ng</th>
+                                        <th class="text-end" style="width: 17.5%;">??n gi·</th>
+                                        <th class="text-end" style="width: 17.5%;">Th‡nh ti?n</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var detail in Model.OrderDetails)
+                                    {
+                                        var subtotal = detail.Quantity * detail.Price;
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div>
+                                                        <p class="mb-1 fw-semibold">@(detail.Product?.Name ?? $"S?n ph?m #{detail.ProductId}")</p>
+                                                        <small class="text-muted">ID: #@detail.ProductId</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-light text-dark">@detail.Quantity</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <strong>@detail.Price.ToString("#,##0") ?</strong>
+                                            </td>
+                                            <td class="text-end">
+                                                <strong class="text-danger">@subtotal.ToString("#,##0") ?</strong>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-4 text-center text-muted">
+                            <p class="mb-0">KhÙng cÛ s?n ph?m trong ??n h‡ng n‡y</p>
+                        </div>
+                    }
+                </div>
+                <!-- Order Summary -->
+                <div class="card-footer bg-light">
+                    <div class="row g-3">
+                        <div class="col-md-6"></div>
+                        <div class="col-md-6">
+                            <div class="row g-2 small">
+                                <div class="col-6 text-end">T?ng ti?n h‡ng:</div>
+                                <div class="col-6 text-end fw-semibold">@Model.TotalPrice.ToString("#,##0") ?</div>
+                                <div class="col-6 text-end">PhÌ v?n chuy?n:</div>
+                                <div class="col-6 text-end fw-semibold text-success">Mi?n phÌ</div>
+                                <hr class="my-1" />
+                                <div class="col-6 text-end fw-bold">T?ng c?ng:</div>
+                                <div class="col-6 text-end fw-bold text-danger fs-5">@Model.TotalPrice.ToString("#,##0") ?</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Shipping Information -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-geo-alt me-2"></i>ThÙng tin giao h‡ng
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="text-muted small fw-semibold d-block mb-1">
+                            <i class="bi bi-map-fill me-1"></i>??a ch? giao
+                        </label>
+                        <p class="mb-0 lh-sm">@Model.ShippingAddress</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small fw-semibold d-block mb-1">
+                            <i class="bi bi-telephone-fill me-1"></i>S? ?i?n tho?i
+                        </label>
+                        <p class="mb-0 fw-semibold">
+                            <a href="tel:@Model.PhoneNumber" class="text-decoration-none">@Model.PhoneNumber</a>
+                        </p>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                    {
+                        <div class="mb-0">
+                            <label class="text-muted small fw-semibold d-block mb-1">
+                                <i class="bi bi-chat-left-text me-1"></i>Ghi ch˙
+                            </label>
+                            <p class="mb-0 text-secondary">@Model.Notes</p>
                         </div>
                     }
                 </div>
             </div>
 
-            <hr class="my-4" />
+            <!-- Customer Information -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-person me-2"></i>ThÙng tin kh·ch h‡ng
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="text-muted small fw-semibold d-block mb-1">
+                            <i class="bi bi-person-fill me-1"></i>H? v‡ tÍn
+                        </label>
+                        <p class="mb-0 fw-semibold">@Model.ApplicationUser?.FullName</p>
+                    </div>
+                    <div class="mb-0">
+                        <label class="text-muted small fw-semibold d-block mb-1">
+                            <i class="bi bi-envelope me-1"></i>Email
+                        </label>
+                        <p class="mb-0">
+                            <a href="mailto:@Model.ApplicationUser?.Email" class="text-decoration-none">@Model.ApplicationUser?.Email</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
 
-            <div class="d-grid gap-2 d-sm-flex justify-content-end">
-                <a asp-action="MyOrders" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Quay l·∫°i
-                </a>
-                @if (User.IsInRole("Customer") && (Model.Status == "Pending" || Model.Status == "Paid"))
-                {
-                    <form asp-action="CancelOrder" asp-route-id="@Model.Id" method="post" class="d-inline">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('B·∫°n ch·∫Øc ch·∫Øn mu·ªën h·ªßy ƒë∆°n h√†ng?')">
-                            <i class="bi bi-x-circle"></i> H·ªßy ƒë∆°n
-                        </button>
-                    </form>
-                }
+            <!-- QR Code -->
+            @if (!string.IsNullOrEmpty(qrCodeBase64))
+            {
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-qr-code me-2"></i>M„ QR theo dıi
+                        </h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="data:image/png;base64,@qrCodeBase64" 
+                             alt="Order QR Code" 
+                             class="img-fluid border rounded" 
+                             style="max-width: 200px;" />
+                        <p class="small text-muted mt-2 mb-0">QuÈt m„ QR ?? theo dıi ??n h‡ng</p>
+                    </div>
+                </div>
+            }
+
+            <!-- Actions -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-action="MyOrders" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Quay l?i danh s·ch
+                        </a>
+                        @if ((User.IsInRole("Customer") || !User.IsInRole("Admin")) && 
+                             (Model.Status == "Pending" || Model.Status == "Paid" || Model.Status == "Processing"))
+                        {
+                            <form asp-action="CancelOrder" asp-route-id="@Model.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" 
+                                        class="btn btn-danger" 
+                                        onclick="return confirm('B?n ch?c ch?n mu?n h?y ??n h‡ng n‡y? H‡nh ??ng n‡y khÙng th? ho‡n t·c.');">
+                                    <i class="bi bi-x-circle me-1"></i>H?y ??n h‡ng
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- üìß Notification Toast -->
-<div id="notificationToast" class="toast position-fixed bottom-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="toast-header bg-info text-white">
-        <strong class="me-auto">Th√¥ng b√°o</strong>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-    <div class="toast-body" id="notificationMessage">
-    </div>
-</div>
+<style>
+    .order-timeline {
+        padding: 20px 0;
+    }
 
-<!-- üîî Real-time Notifications using SignalR -->
+    .timeline-step {
+        position: relative;
+        padding: 0 15px;
+    }
+
+    .timeline-step .step-circle {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin: 0 auto 10px;
+        transition: all 0.3s ease;
+        border: 2px solid #dee2e6;
+    }
+
+    .timeline-step.completed .step-circle {
+        background-color: #198754;
+        color: white;
+        border-color: #198754;
+    }
+
+    .timeline-step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 22px;
+        right: -65%;
+        width: 85%;
+        height: 2px;
+        background-color: #dee2e6;
+    }
+
+    .timeline-step.completed:not(:last-child)::after {
+        background-color: #198754;
+    }
+</style>
+
+<!-- CSS for mobile responsiveness -->
+<link rel="stylesheet" href="~/css/order-details-responsive.css" />
+
+<!-- Real-time Notifications using SignalR -->
 <script src="~/lib/signalr/signalr.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // K·∫øt n·ªëi t·ªõi NotificationHub
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/hub/notifications")
             .withAutomaticReconnect()
             .build();
 
-        // Nh·∫≠n order status update
         connection.on("ReceiveOrderNotification", (orderId, message) => {
             console.log(`Order ${orderId}: ${message}`);
             showNotification(message);
         });
 
-        // Nh·∫≠n order cancelled notification
         connection.on("OrderCancelled", (orderId) => {
             console.log(`Order ${orderId} was cancelled`);
-            showNotification(`ƒê∆°n h√†ng #${orderId} ƒë√£ b·ªã h·ªßy`);
+            showNotification(`??n h‡ng #${orderId} ?„ b? h?y`);
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
@@ -147,12 +351,19 @@
 
         connection.start().catch(err => console.error(err));
 
-        // Hi·ªÉn th·ªã notification toast
         function showNotification(message) {
-            const messageEl = document.getElementById('notificationMessage');
-            messageEl.textContent = message;
-            const toast = new bootstrap.Toast(document.getElementById('notificationToast'));
-            toast.show();
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-info alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
         }
     });
 </script>

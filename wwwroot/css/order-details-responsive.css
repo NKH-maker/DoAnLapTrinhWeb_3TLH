@@ -1,0 +1,71 @@
+/* Order Details Responsive Styles */
+
+@@media (max-width: 576px) {
+    .timeline-step:not(:last-child)::after {
+        display: none;
+    }
+
+    .order-timeline {
+        padding: 10px 0;
+    }
+
+    .timeline-step .step-circle {
+        width: 35px;
+        height: 35px;
+        font-size: 0.8rem;
+    }
+
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .table {
+        font-size: 0.85rem;
+    }
+
+    .btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+}
+
+@@media (max-width: 768px) {
+    .d-flex.align-items-center.justify-content-between {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .text-end {
+        text-align: left;
+    }
+}
+
+/* Additional styling for better visual hierarchy */
+.order-timeline .timeline-step p {
+    font-size: 0.75rem;
+}
+
+.badge {
+    word-break: break-word;
+}
+
+.table-responsive {
+    border-radius: 0.25rem;
+}
+
+.card-body p {
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Print styles */
+@@media print {
+    .btn,
+    .contact-btn {
+        display: none;
+    }
+
+    .card {
+        page-break-inside: avoid;
+    }
+}

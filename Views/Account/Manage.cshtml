@@ -1,0 +1,205 @@
+@model TINH_FINAL_2256.Controllers.ManageViewModel
+
+@{
+    ViewData["Title"] = "Qu?n lý tài kho?n";
+}
+
+<div class="container my-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs mb-4" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">
+                        <i class="bi bi-person me-2"></i>Thông tin cá nhân
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab" aria-controls="security" aria-selected="false">
+                        <i class="bi bi-shield-lock me-2"></i>B?o m?t
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Profile Tab -->
+                <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-4">
+                            @if (TempData["SuccessMessage"] != null)
+                            {
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            }
+
+                            <form asp-action="Manage" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">H? và tên</label>
+                                    <input asp-for="FullName" class="form-control" />
+                                    <span asp-validation-for="FullName" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Email</label>
+                                    <div class="input-group">
+                                        <input asp-for="Email" class="form-control" />
+                                        @if (Model?.Email != null)
+                                        {
+                                            <span class="input-group-text">
+                                                <i class="bi bi-check-circle text-success"></i>
+                                            </span>
+                                        }
+                                    </div>
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                    <small class="text-muted d-block mt-1">N?u ??i email, b?n s? nh?n ???c liên k?t xác nh?n.</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">S? ?i?n tho?i</label>
+                                    <input asp-for="PhoneNumber" class="form-control" />
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">??a ch?</label>
+                                    <input asp-for="Address" class="form-control" />
+                                    <span asp-validation-for="Address" class="text-danger"></span>
+                                </div>
+
+                                <div class="d-grid gap-2 d-sm-flex">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-lg me-2"></i>L?u thay ??i
+                                    </button>
+                                    <a href="/" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-lg me-2"></i>H?y
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Tab -->
+                <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">B?o m?t tài kho?n</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <!-- Change Password -->
+                            <div class="mb-4">
+                                <h6 class="fw-semibold mb-3">
+                                    <i class="bi bi-key me-2"></i>??i m?t kh?u
+                                </h6>
+                                <a asp-controller="Account" asp-action="ChangePassword" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-pencil me-2"></i>??i m?t kh?u
+                                </a>
+                            </div>
+
+                            <!-- External Logins -->
+                            <div class="mb-4">
+                                <h6 class="fw-semibold mb-3">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>??ng nh?p bên ngoài
+                                </h6>
+                                @if (Model?.ExternalLogins != null && Model.ExternalLogins.Any())
+                                {
+                                    <div class="list-group">
+                                        @foreach (var login in Model.ExternalLogins)
+                                        {
+                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-0">
+                                                        @if (login.LoginProvider?.ToLower() == "google")
+                                                        {
+                                                            <i class="bi bi-google text-danger me-2"></i>
+                                                        }
+                                                        else if (login.LoginProvider?.ToLower() == "facebook")
+                                                        {
+                                                            <i class="bi bi-facebook text-primary me-2"></i>
+                                                        }
+                                                        @login.ProviderDisplayName ?? login.LoginProvider
+                                                    </h6>
+                                                    <small class="text-muted">Liên k?t t? tài kho?n c?a b?n</small>
+                                                </div>
+                                                <form asp-action="RemoveExternalLogin" method="post" class="d-inline">
+                                                    <input type="hidden" name="loginProvider" value="@login.LoginProvider" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('B?n ch?c ch?n mu?n g? liên k?t này?')">
+                                                        <i class="bi bi-trash me-1"></i>G? liên k?t
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p class="text-muted small mb-0">B?n ch?a liên k?t tài kho?n bên ngoài</p>
+                                }
+                            </div>
+
+                            <!-- Danger Zone -->
+                            <div class="border-top pt-4">
+                                <h6 class="fw-semibold text-danger mb-3">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>Vùng nguy hi?m
+                                </h6>
+
+                                <form asp-action="DeleteAccount" method="post" onsubmit="return confirm('B?n ch?c ch?n mu?n xóa tài kho?n? Hành ??ng này không th? hoàn tác.');">
+                                    <div class="mb-2">
+                                        <input name="Password" type="password" class="form-control form-control-sm" placeholder="Nh?p m?t kh?u ?? xác nh?n (n?u có)" />
+                                    </div>
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash me-2"></i>Xóa tài kho?n
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="col-lg-4">
+            <div class="card bg-light border-0 mb-3">
+                <div class="card-body">
+                    <h6 class="fw-semibold mb-3">
+                        <i class="bi bi-info-circle me-2"></i>Thông tin tài kho?n
+                    </h6>
+                    <ul class="list-unstyled text-sm">
+                        <li class="mb-2">
+                            <small><strong>Tr?ng thái email:</strong></small><br />
+                            <small class="text-success">? ?ã xác nh?n</small>
+                        </li>
+                        <li class="mb-2">
+                            <small><strong>Lo?i tài kho?n:</strong></small><br />
+                            <small>Khách hàng</small>
+                        </li>
+                        <li>
+                            <small><strong>Tham gia:</strong></small><br />
+                            <small>Tháng 1, 2024</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="fw-semibold mb-2">
+                        <i class="bi bi-question-circle me-2"></i>C?n h? tr??
+                    </h6>
+                    <p class="small text-muted mb-3">Hãy liên h? v?i chúng tôi n?u b?n có b?t k? câu h?i nào.</p>
+                    <a href="/Support/Chat" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-chat-dots me-2"></i>Chat v?i h? tr?
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
