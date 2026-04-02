@@ -1,10 +1,10 @@
-@model List<TINH_FINAL_2256.Models.Order>
+﻿@model List<TINH_FINAL_2256.Models.Order>
 
 @if (Model == null || !Model.Any())
 {
     <div class="text-center text-secondary py-4">
         <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-        <p class="mt-2 mb-0">B?n ch?a c� ??n h�ng n�o</p>
+        <p class="mt-2 mb-0">Bạn chưa có đơn hàng nào</p>
     </div>
 }
 else
@@ -13,12 +13,12 @@ else
         <table class="table align-middle">
             <thead class="table-light">
                 <tr>
-                    <th>M� ??n</th>
-                    <th>Ng�y ??t</th>
-                    <th>S?n ph?m</th>
-                    <th class="text-end">T?ng ti?n</th>
-                    <th>Tr?ng th�i</th>
-                    <th class="text-center">H�nh ??ng</th>
+                    <th>Mã đơn</th>
+                    <th>Ngày đăt</th>
+                    <th>Sản phẩm</th>
+                    <th class="text-end">Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th class="text-center">Hành động</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,12 +37,12 @@ else
 
                     var statusText = order.Status switch
                     {
-                        "Pending" => "Ch? thanh to�n",
-                        "Processing" => "?ang x? l�",
-                        "Paid" => "?� thanh to�n",
-                        "Shipped" => "?ang giao",
-                        "Delivered" => "?� giao",
-                        "Cancelled" => "?� h?y",
+                        "Pending" => "Chờ thanh toán",
+                        "Processing" => "đang xử lý",
+                        "Paid" => "Đã thanh toán",
+                        "Shipped" => "Đang giao",
+                        "Delivered" => "Đã giao",
+                        "Cancelled" => "Đã hủy",
                         _ => order.Status
                     };
 
@@ -56,7 +56,7 @@ else
                         <td>
                             @if (order.OrderDetails != null && order.OrderDetails.Any())
                             {
-                                <small class="badge bg-light text-dark">@order.OrderDetails.Count() s?n ph?m</small>
+                                <small class="badge bg-light text-dark">@order.OrderDetails.Count() sản phẩm</small>
                             }
                             else
                             {
@@ -81,7 +81,7 @@ else
                                 {
                                     <button type="button" 
                                             class="btn btn-outline-warning" 
-                                            title="Ch?nh s?a"
+                                            title="Chỉnh sửa"
                                             data-bs-toggle="modal"
                                             data-bs-target="#editOrderModal"
                                             data-order-id="@order.Id"
@@ -96,7 +96,7 @@ else
                                 {
                                     <button type="button" 
                                             class="btn btn-outline-danger" 
-                                            title="H?y ??n h�ng"
+                                            title="Hủy dơn hàng"
                                             onclick="cancelOrder(@order.Id)">
                                         <i class="bi bi-trash"></i>
                                     </button>
