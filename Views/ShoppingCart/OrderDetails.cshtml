@@ -2,31 +2,157 @@
 
 @{
     ViewData["Title"] = "Chi tiết đơn hàng";
+    var qrCodeBase64 = ViewData["OrderQRCode"] as string;
 }
 
-<h2>Chi tiết đơn hàng #@Model.Id</h2>
-<p>Người mua : @Model.ApplicationUser?.Email</p>
-<p>Ngày: @Model.OrderDate.ToString("g")</p>
-<p>Tổng: @Model.TotalPrice.ToString("#,##0") Vn</p>
+<div class="container my-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+                <div>
+                    <h2 class="mb-1">Chi tiết đơn hàng #@Model.Id</h2>
+                    <p class="text-muted mb-0">Ngày đặt: @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+                <span class="badge bg-info fs-6">@Model.Status</span>
+            </div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Sản phẩm</th>
-            <th>Số lượng</th>
-            <th>Giá</th>
-            <th>Thành tiền</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var d in Model.OrderDetails)
-        {
-            <tr>
-                <td>@d.Product?.Name</td>
-                <td>@d.Quantity</td>
-                <td>@($"{d.Price:#,##0} Vnđ")</td>
-                <td>@($"{(d.Quantity * d.Price):#,##0} Vnđ")</td>
-            </tr>
+            <hr />
+
+            <div class="row g-3">
+                <div class="col-lg-8">
+                    <h5 class="mb-3">Chi tiết sản phẩm</h5>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th class="text-center">Số lượng</th>
+                                    <th class="text-end">Đơn giá</th>
+                                    <th class="text-end">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var d in Model.OrderDetails)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@d.Product?.Name</td>
+                                        <td class="text-center">@d.Quantity</td>
+                                        <td class="text-end">@d.Price.ToString("#,##0") Vnđ</td>
+                                        <td class="text-end fw-semibold">@((d.Quantity * d.Price).ToString("#,##0")) Vnđ</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <h5 class="mb-3">Thông tin khách hàng</h5>
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="text-muted small">Email</label>
+                                <p class="mb-0 fw-semibold">@Model.ApplicationUser?.Email</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted small">Số điện thoại</label>
+                                <p class="mb-0 fw-semibold">@Model.PhoneNumber</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted small">Địa chỉ giao hàng</label>
+                                <p class="mb-0 fw-semibold">@Model.ShippingAddress</p>
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                            {
+                                <div class="mb-3">
+                                    <label class="text-muted small">Ghi chú</label>
+                                    <p class="mb-0 fw-semibold">@Model.Notes</p>
+                                </div>
+                            }
+                            <hr />
+                            <div class="d-flex justify-content-between fw-bold fs-5">
+                                <span>Tổng cộng:</span>
+                                <span>@Model.TotalPrice.ToString("#,##0") Vnđ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🔗 QR Code Tracking -->
+                    @if (!string.IsNullOrEmpty(qrCodeBase64))
+                    {
+                        <div class="card border-0 bg-light mt-3">
+                            <div class="card-body text-center">
+                                <label class="text-muted small d-block mb-2">Mã QR theo dõi đơn hàng</label>
+                                <img src="data:image/png;base64,@qrCodeBase64" alt="Order QR Code" class="img-fluid" style="max-width: 200px;" />
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="d-grid gap-2 d-sm-flex justify-content-end">
+                <a asp-action="MyOrders" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Quay lại
+                </a>
+                @if (User.IsInRole("Customer") && (Model.Status == "Pending" || Model.Status == "Paid"))
+                {
+                    <form asp-action="CancelOrder" asp-route-id="@Model.Id" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Bạn chắc chắn muốn hủy đơn hàng?')">
+                            <i class="bi bi-x-circle"></i> Hủy đơn
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 📧 Notification Toast -->
+<div id="notificationToast" class="toast position-fixed bottom-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header bg-info text-white">
+        <strong class="me-auto">Thông báo</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body" id="notificationMessage">
+    </div>
+</div>
+
+<!-- 🔔 Real-time Notifications using SignalR -->
+<script src="~/lib/signalr/signalr.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Kết nối tới NotificationHub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hub/notifications")
+            .withAutomaticReconnect()
+            .build();
+
+        // Nhận order status update
+        connection.on("ReceiveOrderNotification", (orderId, message) => {
+            console.log(`Order ${orderId}: ${message}`);
+            showNotification(message);
+        });
+
+        // Nhận order cancelled notification
+        connection.on("OrderCancelled", (orderId) => {
+            console.log(`Order ${orderId} was cancelled`);
+            showNotification(`Đơn hàng #${orderId} đã bị hủy`);
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        });
+
+        connection.start().catch(err => console.error(err));
+
+        // Hiển thị notification toast
+        function showNotification(message) {
+            const messageEl = document.getElementById('notificationMessage');
+            messageEl.textContent = message;
+            const toast = new bootstrap.Toast(document.getElementById('notificationToast'));
+            toast.show();
         }
-    </tbody>
-</table>
+    });
+</script>

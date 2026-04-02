@@ -5,6 +5,7 @@
     ViewData["Title"] = "Đặt hàng thành công";
     var order = Model;
     var total = order.TotalPrice;
+    var qrCodeBase64 = ViewData["OrderQRCode"] as string;
 }
 
 <div class="container my-4">
@@ -73,6 +74,16 @@
                             <span>Tổng thanh toán</span>
                             <span>@total.ToString("#,##0") Vnđ</span>
                         </div>
+
+                        <!-- 🔗 QR Code Tracking -->
+                        @if (!string.IsNullOrEmpty(qrCodeBase64))
+                        {
+                            <hr />
+                            <div class="text-center">
+                                <div class="text-muted small mb-2">Quét mã QR để theo dõi đơn hàng</div>
+                                <img src="data:image/png;base64,@qrCodeBase64" alt="Order QR Code" class="img-fluid" style="max-width: 150px;" />
+                            </div>
+                        }
                     </div>
 
                     <div class="d-grid gap-2 mt-3">
@@ -88,3 +99,22 @@
         </div>
     </div>
 </div>
+
+<!-- 🔔 Real-time Notifications using SignalR -->
+<script src="~/lib/signalr/signalr.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Kết nối tới NotificationHub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hub/notifications")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("ReceiveOrderNotification", (orderId, message) => {
+            console.log(`Order ${orderId}: ${message}`);
+            // Cập nhật UI nếu cần
+        });
+
+        connection.start().catch(err => console.error(err));
+    });
+</script>

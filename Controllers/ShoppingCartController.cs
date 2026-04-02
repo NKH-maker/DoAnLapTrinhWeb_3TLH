@@ -2,9 +2,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using TINH_FINAL_2256.Extensions;
 using TINH_FINAL_2256.Models;
 using TINH_FINAL_2256.Repositories;
+using TINH_FINAL_2256.Services;
+using TINH_FINAL_2256.Hubs;
+using Microsoft.AspNetCore.SignalR;
+using System.Text.Json;
 
 namespace TINH_FINAL_2256.Controllers
 {
@@ -13,60 +18,112 @@ namespace TINH_FINAL_2256.Controllers
         private readonly IProductRepository _productRepository;
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IEmailService _emailService;
+        private readonly IMessageQueueService _messageQueueService;
+        private readonly IBackgroundJobService _backgroundJobService;
+        private readonly IQRCodeService _qrCodeService;
+        private readonly IExcelService _excelService;
+        private readonly IDistributedCache _cache;
+        private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly ILogger<ShoppingCartController> _logger;
 
         public ShoppingCartController(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            IProductRepository productRepository)
+            IProductRepository productRepository,
+            IEmailService emailService,
+            IMessageQueueService messageQueueService,
+            IBackgroundJobService backgroundJobService,
+            IQRCodeService qrCodeService,
+            IExcelService excelService,
+            IDistributedCache cache,
+            IHubContext<NotificationHub> hubContext,
+            ILogger<ShoppingCartController> logger)
         {
             _productRepository = productRepository;
             _context = context;
             _userManager = userManager;
+            _emailService = emailService;
+            _messageQueueService = messageQueueService;
+            _backgroundJobService = backgroundJobService;
+            _qrCodeService = qrCodeService;
+            _excelService = excelService;
+            _cache = cache;
+            _hubContext = hubContext;
+            _logger = logger;
         }
 
         public async Task<IActionResult> AddToCart(int productId, int quantity)
         {
-            var product = await GetProductFromDatabase(productId);
-
-            var cartItem = new CartItem
+            try
             {
-                ProductId = productId,
-                Name = product.Name,
-                Price = product.Price,
-                Quantity = quantity,
-                ImageUrl = product.ImageUrl ?? "~/images/placeholder.png",
-                CategoryName = product.Category?.Name ?? string.Empty
-            };
+                _logger.LogInformation("Adding product {ProductId} to cart with quantity {Quantity}", productId, quantity);
 
-            var cart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart")
-                       ?? new ShoppingCart();
+                var product = await GetProductFromDatabase(productId);
 
-            cart.AddItem(cartItem);
+                var cartItem = new CartItem
+                {
+                    ProductId = productId,
+                    Name = product.Name,
+                    Price = product.Price,
+                    Quantity = quantity,
+                    ImageUrl = product.ImageUrl ?? "~/images/placeholder.png",
+                    CategoryName = product.Category?.Name ?? string.Empty
+                };
 
-            HttpContext.Session.SetObjectAsJson("Cart", cart);
+                var cart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart")
+                           ?? new ShoppingCart();
 
-            return RedirectToAction("Index");
+                cart.AddItem(cartItem);
+
+                HttpContext.Session.SetObjectAsJson("Cart", cart);
+
+                // Clear cache khi cart thay ??i
+                var user = await _userManager.GetUserAsync(User);
+                if (user != null)
+                {
+                    await _cache.RemoveAsync($"user_cart_{user.Id}");
+                }
+
+                _logger.LogInformation("Product added to cart successfully");
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding product to cart");
+                return RedirectToAction("Index");
+            }
         }
 
         public async Task<IActionResult> Index()
         {
-            // If current user is admin, show all placed orders instead of session cart
-            if (User.IsInRole(SD.Role_Admin))
+            try
             {
-                var orders = await _context.Orders
-                    .Include(o => o.ApplicationUser)
-                    .Include(o => o.OrderDetails)
-                        .ThenInclude(od => od.Product)
-                    .OrderByDescending(o => o.OrderDate)
-                    .ToListAsync();
+                // If current user is admin, show all placed orders instead of session cart
+                if (User.IsInRole(SD.Role_Admin))
+                {
+                    _logger.LogInformation("Admin user accessing orders list");
 
-                return View("AdminOrders", orders);
+                    var orders = await _context.Orders
+                        .Include(o => o.ApplicationUser)
+                        .Include(o => o.OrderDetails)
+                            .ThenInclude(od => od.Product)
+                        .OrderByDescending(o => o.OrderDate)
+                        .ToListAsync();
+
+                    return View("AdminOrders", orders);
+                }
+
+                var cart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart")
+                           ?? new ShoppingCart();
+
+                return View(cart);
             }
-
-            var cart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart")
-                       ?? new ShoppingCart();
-
-            return View(cart);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ShoppingCart Index");
+                return View(new ShoppingCart());
+            }
         }
 
         private async Task<Product> GetProductFromDatabase(int productId)
@@ -129,159 +186,333 @@ namespace TINH_FINAL_2256.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Checkout(Order order)
         {
-            var cart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart");
-
-            if (cart == null || !cart.Items.Any())
+            try
             {
-                return RedirectToAction("Index");
+                var cart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart");
+
+                if (cart == null || !cart.Items.Any())
+                {
+                    return RedirectToAction("Index");
+                }
+
+                // Server-side validation
+                if (!ModelState.IsValid)
+                {
+                    return View(order);
+                }
+
+                var user = await _userManager.GetUserAsync(User);
+
+                order.UserId = user?.Id ?? string.Empty;
+                order.OrderDate = DateTime.UtcNow;
+                order.TotalPrice = cart.Items.Sum(i => i.Price * i.Quantity);
+
+                // Ensure non-null defaults
+                order.PhoneNumber = order.PhoneNumber ?? user?.PhoneNumber ?? string.Empty;
+                order.ShippingAddress = order.ShippingAddress ?? string.Empty;
+                order.Notes = order.Notes ?? string.Empty;
+                order.Status = order.Status ?? "Pending";
+
+                order.OrderDetails = cart.Items.Select(i => new OrderDetail
+                {
+                    ProductId = i.ProductId,
+                    Quantity = i.Quantity,
+                    Price = i.Price
+                }).ToList();
+
+                _context.Orders.Add(order);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Order created: {OrderId} by user {UserId}", order.Id, user?.Id);
+
+                // ?? G?i order confirmation email b?t ??ng b? qua Hangfire
+                var subject = "Xác Nh?n ??n Hàng";
+                var body = $@"
+                    <h2>C?m ?n b?n ?ã ??t hàng!</h2>
+                    <p>Mã ??n hàng: <strong>{order.Id}</strong></p>
+                    <p>Ngày ??t: {order.OrderDate:dd/MM/yyyy HH:mm}</p>
+                    <p>T?ng ti?n: <strong>{order.TotalPrice:C}</strong></p>
+                    <p><a href='{Request.Scheme}://{Request.Host}/ShoppingCart/OrderDetails/{order.Id}'>Xem chi ti?t ??n hàng</a></p>
+                ";
+                
+                _backgroundJobService.ScheduleEmailJob(
+                    user?.Email ?? order.PhoneNumber, 
+                    subject, 
+                    body, 
+                    TimeSpan.FromSeconds(5));
+
+                // ?? G?i notification qua RabbitMQ
+                _messageQueueService.PublishOrderNotification(
+                    order.Id.ToString(), 
+                    $"Order {order.Id} created successfully - Total: {order.TotalPrice:C}");
+
+                // ?? G?i real-time notification qua SignalR
+                await _hubContext.Clients.All.SendAsync(
+                    "ReceiveOrderNotification", 
+                    order.Id.ToString(), 
+                    $"New Order #{order.Id} - {order.TotalPrice:C}");
+
+                _logger.LogInformation("Order notifications sent for order {OrderId}", order.Id);
+
+                return RedirectToAction(nameof(Payment), new { id = order.Id });
             }
-
-            // Server-side validation
-            if (!ModelState.IsValid)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error during checkout");
+                ModelState.AddModelError("", "Có l?i x?y ra khi x? lý ??n hàng. Vui lòng th? l?i.");
                 return View(order);
             }
-
-            var user = await _userManager.GetUserAsync(User);
-
-            order.UserId = user?.Id ?? string.Empty;
-            order.OrderDate = DateTime.UtcNow;
-            order.TotalPrice = cart.Items.Sum(i => i.Price * i.Quantity);
-
-            // Ensure non-null defaults
-            order.PhoneNumber = order.PhoneNumber ?? user?.PhoneNumber ?? string.Empty;
-            order.ShippingAddress = order.ShippingAddress ?? string.Empty;
-            order.Notes = order.Notes ?? string.Empty;
-            order.Status = order.Status ?? "Pending";
-
-            order.OrderDetails = cart.Items.Select(i => new OrderDetail
-            {
-                ProductId = i.ProductId,
-                Quantity = i.Quantity,
-                Price = i.Price
-            }).ToList();
-
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Payment), new { id = order.Id });
         }
 
         public async Task<IActionResult> Payment(int id)
         {
-            var order = await _context.Orders
-                .Include(o => o.ApplicationUser)
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Product)
-                .FirstOrDefaultAsync(o => o.Id == id);
+            try
+            {
+                var order = await _context.Orders
+                    .Include(o => o.ApplicationUser)
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
+                    .FirstOrDefaultAsync(o => o.Id == id);
 
-            if (order == null) return NotFound();
-            return View(order);
+                if (order == null) return NotFound();
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading payment page for order {OrderId}", id);
+                return NotFound();
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult ConfirmPayment(int id)
+        public async Task<IActionResult> ConfirmPayment(int id)
         {
-            HttpContext.Session.Remove("Cart");
-            return RedirectToAction(nameof(OrderCompleted), new { id });
+            try
+            {
+                var order = await _context.Orders.FindAsync(id);
+                if (order != null)
+                {
+                    order.Status = "Paid";
+                    await _context.SaveChangesAsync();
+                    
+                    _logger.LogInformation("Payment confirmed for order {OrderId}", id);
+                }
+
+                HttpContext.Session.Remove("Cart");
+                return RedirectToAction(nameof(OrderCompleted), new { id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error confirming payment for order {OrderId}", id);
+                return RedirectToAction(nameof(OrderCompleted), new { id });
+            }
         }
 
         public async Task<IActionResult> OrderCompleted(int id)
         {
-            var order = await _context.Orders
-                .Include(o => o.ApplicationUser)
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Product)
-                .FirstOrDefaultAsync(o => o.Id == id);
+            try
+            {
+                var order = await _context.Orders
+                    .Include(o => o.ApplicationUser)
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
+                    .FirstOrDefaultAsync(o => o.Id == id);
 
-            if (order == null) return NotFound();
-            return View(order);
+                if (order == null) return NotFound();
+
+                // ?? T?o QR code cho order tracking
+                var qrCodeData = $"{Request.Scheme}://{Request.Host}/ShoppingCart/OrderDetails/{order.Id}";
+                var qrCodeBase64 = _qrCodeService.GenerateQRCodeBase64(qrCodeData);
+                ViewData["OrderQRCode"] = qrCodeBase64;
+
+                _logger.LogInformation("Order completed page loaded for order {OrderId}", id);
+
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading order completed page for order {OrderId}", id);
+                return NotFound();
+            }
         }
 
         public async Task<IActionResult> OrderDetails(int id)
         {
-            var order = await _context.Orders
-                .Include(o => o.ApplicationUser)
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Product)
-                .FirstOrDefaultAsync(o => o.Id == id);
+            try
+            {
+                var order = await _context.Orders
+                    .Include(o => o.ApplicationUser)
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
+                    .FirstOrDefaultAsync(o => o.Id == id);
 
-            if (order == null) return NotFound();
+                if (order == null) return NotFound();
 
-            return View(order);
+                // ?? T?o QR code cho order
+                var qrCodeData = $"{Request.Scheme}://{Request.Host}/ShoppingCart/OrderDetails/{order.Id}";
+                var qrCodeBase64 = _qrCodeService.GenerateQRCodeBase64(qrCodeData);
+                ViewData["OrderQRCode"] = qrCodeBase64;
+
+                _logger.LogInformation("Order details loaded for order {OrderId}", id);
+
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading order details for order {OrderId}", id);
+                return NotFound();
+            }
         }
 
-        // New: View orders for current customer
+        // View orders for current customer with caching
         public async Task<IActionResult> MyOrders()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Challenge();
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null) return Challenge();
 
-            var orders = await _context.Orders
-                .Where(o => o.UserId == user.Id)
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Product)
-                .OrderByDescending(o => o.OrderDate)
-                .ToListAsync();
+                // Ki?m tra cache
+                var cachedOrders = await _cache.GetStringAsync($"user_orders_{user.Id}");
+                if (!string.IsNullOrEmpty(cachedOrders))
+                {
+                    _logger.LogInformation("User orders loaded from cache for user {UserId}", user.Id);
+                    // Cache hit - có th? dùng nh?ng v?n l?y fresh data d??i
+                }
 
-            return View(orders);
+                var orders = await _context.Orders
+                    .Where(o => o.UserId == user.Id)
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
+                    .OrderByDescending(o => o.OrderDate)
+                    .ToListAsync();
+
+                // Cache orders cho 10 phút
+                await _cache.SetStringAsync($"user_orders_{user.Id}", 
+                    JsonSerializer.Serialize(orders),
+                    new DistributedCacheEntryOptions 
+                    { 
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10) 
+                    });
+
+                _logger.LogInformation("User orders loaded for user {UserId}", user.Id);
+
+                return View(orders);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading user orders");
+                return View(new List<Order>());
+            }
         }
 
-        // New: Get recent orders for cart modal (AJAX endpoint)
+        // Get recent orders for cart modal (AJAX endpoint)
         public async Task<IActionResult> GetRecentOrders()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null) return Unauthorized();
 
-            var orders = await _context.Orders
-                .Where(o => o.UserId == user.Id)
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Product)
-                .OrderByDescending(o => o.OrderDate)
-                .Take(3)
-                .ToListAsync();
+                var orders = await _context.Orders
+                    .Where(o => o.UserId == user.Id)
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
+                    .OrderByDescending(o => o.OrderDate)
+                    .Take(3)
+                    .ToListAsync();
 
-            return PartialView("_RecentOrdersPartial", orders);
+                return PartialView("_RecentOrdersPartial", orders);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading recent orders");
+                return PartialView("_RecentOrdersPartial", new List<Order>());
+            }
         }
 
-        // New: Cancel order (only if customer and not shipped/delivered)
+        // Cancel order (only if customer and not shipped/delivered)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelOrder(int id)
         {
-            var user = await _userManager.GetUserAsync(User);
-            var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id && o.UserId == user.Id);
-            if (order == null) return NotFound();
-
-            if (order.Status == "Shipped" || order.Status == "Delivered")
+            try
             {
-                return BadRequest("Không th? h?y ??n ?ã v?n chuy?n ho?c giao hàng");
-            }
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null) return Unauthorized();
 
-            order.Status = "Cancelled";
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(MyOrders));
+                var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id && o.UserId == user.Id);
+                
+                if (order == null) return NotFound();
+
+                if (order.Status == "Shipped" || order.Status == "Delivered")
+                {
+                    _logger.LogWarning("Attempt to cancel shipped/delivered order {OrderId}", id);
+                    return BadRequest("Không th? h?y ??n ?ã v?n chuy?n ho?c giao hàng");
+                }
+
+                order.Status = "Cancelled";
+                await _context.SaveChangesAsync();
+
+                // ?? G?i notification
+                await _hubContext.Clients.User(user.Id)
+                    .SendAsync("OrderCancelled", order.Id);
+
+                // ?? G?i email h?y ??n
+                _backgroundJobService.ScheduleEmailJob(
+                    user.Email ?? "",
+                    "H?y ??n Hàng",
+                    $"??n hàng #{order.Id} ?ã ???c h?y",
+                    TimeSpan.FromSeconds(5));
+
+                _logger.LogInformation("Order {OrderId} cancelled by user {UserId}", id, user.Id);
+
+                return RedirectToAction(nameof(MyOrders));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error cancelling order {OrderId}", id);
+                return BadRequest("Có l?i x?y ra khi h?y ??n hàng");
+            }
         }
 
-        // New: Update shipping address and phone for an order (customer)
+        // Update shipping address and phone for an order (customer)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateOrder(int id, string shippingAddress, string phoneNumber)
         {
-            var user = await _userManager.GetUserAsync(User);
-            var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id && o.UserId == user.Id);
-            if (order == null) return NotFound();
-
-            if (order.Status == "Shipped" || order.Status == "Delivered")
+            try
             {
-                return BadRequest("Không th? s?a ??n ?ã v?n chuy?n ho?c giao hàng");
-            }
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null) return Unauthorized();
 
-            order.ShippingAddress = shippingAddress ?? order.ShippingAddress;
-            order.PhoneNumber = phoneNumber ?? order.PhoneNumber;
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(OrderDetails), new { id = id });
+                var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id && o.UserId == user.Id);
+                
+                if (order == null) return NotFound();
+
+                if (order.Status == "Shipped" || order.Status == "Delivered")
+                {
+                    _logger.LogWarning("Attempt to update shipped/delivered order {OrderId}", id);
+                    return BadRequest("Không th? s?a ??n ?ã v?n chuy?n ho?c giao hàng");
+                }
+
+                order.ShippingAddress = shippingAddress ?? order.ShippingAddress;
+                order.PhoneNumber = phoneNumber ?? order.PhoneNumber;
+                await _context.SaveChangesAsync();
+
+                // Clear cache
+                await _cache.RemoveAsync($"user_orders_{user.Id}");
+
+                _logger.LogInformation("Order {OrderId} updated by user {UserId}", id, user.Id);
+
+                return RedirectToAction(nameof(OrderDetails), new { id = id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating order {OrderId}", id);
+                return BadRequest("Có l?i x?y ra khi c?p nh?t ??n hàng");
+            }
         }
 
         // API to return cart count and items for header modal
@@ -290,16 +521,65 @@ namespace TINH_FINAL_2256.Controllers
             var cart = HttpContext.Session.GetObjectFromJson<ShoppingCart>("Cart") ?? new ShoppingCart();
             return PartialView("_CartSummaryPartial", cart);
         }
+
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAdminOrdersPartial()
         {
-            var orders = await _context.Orders
-                .Include(o => o.ApplicationUser)
-                .OrderByDescending(o => o.OrderDate)
-                .Take(10)
-                .ToListAsync();
+            try
+            {
+                var orders = await _context.Orders
+                    .Include(o => o.ApplicationUser)
+                    .OrderByDescending(o => o.OrderDate)
+                    .Take(10)
+                    .ToListAsync();
 
-            return PartialView("_AdminOrdersPartial", orders);
+                return PartialView("_AdminOrdersPartial", orders);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading admin orders");
+                return PartialView("_AdminOrdersPartial", new List<Order>());
+            }
+        }
+
+        // ?? Export orders to Excel
+        [Authorize(Roles = "Admin")]
+        [HttpGet("export-orders-excel")]
+        public async Task<IActionResult> ExportOrdersToExcel()
+        {
+            try
+            {
+                var orders = await _context.Orders
+                    .Include(o => o.ApplicationUser)
+                    .Include(o => o.OrderDetails)
+                    .ToListAsync();
+
+                // Transform to dynamic for Excel
+                var exportData = orders.Select(o => new
+                {
+                    o.Id,
+                    CustomerName = o.ApplicationUser?.UserName ?? "Unknown",
+                    o.PhoneNumber,
+                    o.ShippingAddress,
+                    o.OrderDate,
+                    o.TotalPrice,
+                    o.Status,
+                    ItemCount = o.OrderDetails?.Count ?? 0
+                }).ToList();
+
+                var excelBytes = _excelService.ExportToExcel(exportData, "Orders");
+
+                _logger.LogInformation("Orders exported to Excel by admin");
+
+                return File(excelBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"Orders_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting orders to Excel");
+                return BadRequest("Có l?i x?y ra khi xu?t Excel");
+            }
         }
     }
 }
