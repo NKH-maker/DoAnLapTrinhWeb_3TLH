@@ -1,0 +1,111 @@
+@model List<TINH_FINAL_2256.Models.Order>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="text-center text-secondary py-4">
+        <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+        <p class="mt-2 mb-0">B?n ch?a có ??n hàng nào</p>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Mã ??n</th>
+                    <th>Ngày ??t</th>
+                    <th>S?n ph?m</th>
+                    <th class="text-end">T?ng ti?n</th>
+                    <th>Tr?ng thái</th>
+                    <th class="text-center">Hành ??ng</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    var statusBadgeClass = order.Status switch
+                    {
+                        "Pending" => "bg-warning text-dark",
+                        "Processing" => "bg-info",
+                        "Paid" => "bg-success",
+                        "Shipped" => "bg-primary",
+                        "Delivered" => "bg-success",
+                        "Cancelled" => "bg-danger",
+                        _ => "bg-secondary"
+                    };
+
+                    var statusText = order.Status switch
+                    {
+                        "Pending" => "Ch? thanh toán",
+                        "Processing" => "?ang x? lý",
+                        "Paid" => "?ã thanh toán",
+                        "Shipped" => "?ang giao",
+                        "Delivered" => "?ã giao",
+                        "Cancelled" => "?ã h?y",
+                        _ => order.Status
+                    };
+
+                    <tr>
+                        <td class="fw-bold">
+                            <i class="bi bi-box me-1" style="color: #0d6efd;"></i>#@order.Id
+                        </td>
+                        <td>
+                            <small>@order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small>
+                        </td>
+                        <td>
+                            @if (order.OrderDetails != null && order.OrderDetails.Any())
+                            {
+                                <small class="badge bg-light text-dark">@order.OrderDetails.Count() s?n ph?m</small>
+                            }
+                            else
+                            {
+                                <small class="text-muted">-</small>
+                            }
+                        </td>
+                        <td class="text-end fw-bold text-danger">
+                            @order.TotalPrice.ToString("#,##0") ?
+                        </td>
+                        <td>
+                            <span class="badge @statusBadgeClass">@statusText</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <!-- View Details Button -->
+                                <button type="button" class="btn btn-outline-primary" title="Xem chi ti?t" onclick="viewOrderDetails(@order.Id)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+
+                                <!-- Edit Button (Only for non-delivered/cancelled orders) -->
+                                @if (order.Status != "Shipped" && order.Status != "Delivered" && order.Status != "Cancelled")
+                                {
+                                    <button type="button" 
+                                            class="btn btn-outline-warning" 
+                                            title="Ch?nh s?a"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editOrderModal"
+                                            data-order-id="@order.Id"
+                                            data-shipping-address="@Html.Raw(Html.Encode(order.ShippingAddress))"
+                                            data-phone-number="@Html.Raw(Html.Encode(order.PhoneNumber))">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                }
+
+                                <!-- Cancel Button (Only for non-shipped orders) -->
+                                @if (order.Status != "Shipped" && order.Status != "Delivered" && order.Status != "Cancelled")
+                                {
+                                    <button type="button" 
+                                            class="btn btn-outline-danger" 
+                                            title="H?y ??n hàng"
+                                            onclick="cancelOrder(@order.Id)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

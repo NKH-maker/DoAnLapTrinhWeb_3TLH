@@ -114,17 +114,6 @@ try
         }
     }
 
-    // Seed sample data (orders)
-    using (var scope = app.Services.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>();
-        
-        var seeder = new TINH_FINAL_2256.Services.DataSeeder(context, userManager, logger);
-        await seeder.SeedSampleOrdersAsync();
-    }
-
     // Middleware
     if (!app.Environment.IsDevelopment())
     {

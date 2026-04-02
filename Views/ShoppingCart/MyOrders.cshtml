@@ -4,434 +4,387 @@
     ViewData["Title"] = "Đơn hàng của tôi";
 }
 
-<div class="container-fluid my-4">
-    <div class="row g-4">
-        <!-- Main Orders List -->
-        <div class="col-lg-9">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="bi bi-receipt me-2"></i>Đơn hàng của tôi
-                    </h5>
-                    <span class="badge bg-light text-primary">
-                        @(Model?.Count() ?? 0) đơn
-                    </span>
+<div class="container my-4">
+    <!-- Header -->
+    <div class="mb-4">
+        <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+            <div>
+                <h2 class="mb-1">
+                    <i class="bi bi-receipt me-2"></i>Đơn hàng của tôi
+                </h2>
+                <p class="text-muted mb-0">Quản lý và theo dõi các đơn hàng của bạn</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-controller="Product" asp-action="Index" class="btn btn-outline-primary">
+                    <i class="bi bi-bag-plus me-1"></i>Tiếp tục mua sắm
+                </a>
+                <a asp-controller="ShoppingCart" asp-action="ExportMyOrdersToExcel" class="btn btn-success">
+                    <i class="bi bi-download me-1"></i>Xuất Excel
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">
+                    <i class="bi bi-inbox text-secondary"></i>
                 </div>
-                <div class="card-body">
-                    @if (Model == null || !Model.Any())
-                    {
-                        <div class="alert alert-info text-center py-5">
-                            <i class="bi bi-inbox" style="font-size: 3rem; color: #0d6efd;"></i>
-                            <p class="mt-3 mb-0 fs-5">Bạn chưa có đơn hàng nào.</p>
-                            <p class="text-muted small mt-1">Hãy khám phá các sản phẩm của chúng tôi để bắt đầu mua sắm</p>
-                            <a asp-controller="Product" asp-action="Index" class="btn btn-primary btn-sm mt-3">
-                                <i class="bi bi-shop me-1"></i>Tiếp tục mua sắm
-                            </a>
+                <h5 class="mb-2">Chưa có đơn hàng</h5>
+                <p class="text-muted mb-3">Bạn chưa đặt hàng nào. Hãy bắt đầu mua sắm ngay!</p>
+                <a asp-controller="Product" asp-action="Index" class="btn btn-primary">
+                    <i class="bi bi-shop me-1"></i>Khám phá sản phẩm
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <!-- Main Orders List -->
+            <div class="col-lg-9">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list-check me-2"></i>Tất cả đơn hàng
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 80px;">Mã đơn</th>
+                                        <th style="width: 130px;">Ngày đặt</th>
+                                        <th>Sản phẩm</th>
+                                        <th style="width: 120px;" class="text-end">Tổng tiền</th>
+                                        <th style="width: 110px;">Trạng thái</th>
+                                        <th style="width: 100px;" class="text-center">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model)
+                                    {
+                                        var statusBadgeClass = order.Status switch
+                                        {
+                                            "Pending" => "bg-warning text-dark",
+                                            "Processing" => "bg-info",
+                                            "Paid" => "bg-success",
+                                            "Shipped" => "bg-primary",
+                                            "Delivered" => "bg-success",
+                                            "Cancelled" => "bg-danger",
+                                            _ => "bg-secondary"
+                                        };
+
+                                        var statusText = order.Status switch
+                                        {
+                                            "Pending" => "Chờ thanh toán",
+                                            "Processing" => "Đang xử lý",
+                                            "Paid" => "Đã thanh toán",
+                                            "Shipped" => "Đang giao",
+                                            "Delivered" => "Đã giao",
+                                            "Cancelled" => "Đã hủy",
+                                            _ => order.Status
+                                        };
+
+                                        <tr>
+                                            <td class="fw-bold">
+                                                <i class="bi bi-box me-1" style="color: #0d6efd;"></i>#@order.Id
+                                            </td>
+                                            <td>
+                                                <small>@order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy")</small>
+                                                <br />
+                                                <small class="text-muted">@order.OrderDate.ToLocalTime().ToString("HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                @if (order.OrderDetails != null && order.OrderDetails.Any())
+                                                {
+                                                    <small class="badge bg-light text-dark">@order.OrderDetails.Count() sản phẩm</small>
+                                                }
+                                                else
+                                                {
+                                                    <small class="text-muted">-</small>
+                                                }
+                                            </td>
+                                            <td class="text-end fw-bold text-danger">
+                                                @order.TotalPrice.ToString("#,##0") đ
+                                            </td>
+                                            <td>
+                                                <span class="badge @statusBadgeClass">@statusText</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <a asp-action="OrderDetails" asp-route-id="@order.Id" 
+                                                   class="btn btn-sm btn-outline-primary" 
+                                                   title="Xem chi tiết">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                @if (order.Status != "Shipped" && order.Status != "Delivered" && order.Status != "Cancelled")
+                                                {
+                                                    <form asp-action="CancelOrder" method="post" style="display:inline;">
+                                                        <input type="hidden" name="id" value="@order.Id" />
+                                                        <button type="submit" 
+                                                                class="btn btn-sm btn-outline-danger" 
+                                                                onclick="return confirm('Bạn có chắc muốn hủy đơn hàng #@order.Id?');" 
+                                                                title="Hủy đơn hàng">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
                         </div>
-                    }
-                    else
-                    {
-                        <!-- Filter Tabs -->
-                        <ul class="nav nav-pills nav-fill mb-3 bg-light p-2 rounded-2" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-orders" 
-                                        type="button" role="tab" aria-controls="all-orders" aria-selected="true">
-                                    <i class="bi bi-list me-1"></i>Tất cả
-                                    <span class="badge bg-secondary ms-1">@Model.Count()</span>
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending-orders" 
-                                        type="button" role="tab" aria-controls="pending-orders" aria-selected="false">
-                                    <i class="bi bi-clock me-1"></i>Chờ xử lý
-                                    <span class="badge bg-warning ms-1">@Model.Count(o => o.Status == "Pending" || o.Status == "Processing")</span>
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="delivered-tab" data-bs-toggle="tab" data-bs-target="#delivered-orders" 
-                                        type="button" role="tab" aria-controls="delivered-orders" aria-selected="false">
-                                    <i class="bi bi-check-circle me-1"></i>Đã giao
-                                    <span class="badge bg-success ms-1">@Model.Count(o => o.Status == "Delivered")</span>
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled-orders" 
-                                        type="button" role="tab" aria-controls="cancelled-orders" aria-selected="false">
-                                    <i class="bi bi-x-circle me-1"></i>Đã hủy
-                                    <span class="badge bg-danger ms-1">@Model.Count(o => o.Status == "Cancelled")</span>
-                                </button>
-                            </li>
-                        </ul>
+                    </div>
+                </div>
+            </div>
 
-                        <!-- Tab Content -->
-                        <div class="tab-content">
-                            <!-- All Orders -->
-                            <div class="tab-pane fade show active" id="all-orders" role="tabpanel" aria-labelledby="all-tab">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Mã đơn</th>
-                                                <th>Ngày đặt</th>
-                                                <th>Sản phẩm</th>
-                                                <th class="text-end">Tổng tiền</th>
-                                                <th>Trạng thái</th>
-                                                <th class="text-center">Hành động</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var order in Model.OrderByDescending(o => o.OrderDate))
-                                            {
-                                                var statusBadgeClass = order.Status switch
-                                                {
-                                                    "Pending" => "bg-warning",
-                                                    "Processing" => "bg-info",
-                                                    "Paid" => "bg-success",
-                                                    "Shipped" => "bg-primary",
-                                                    "Delivered" => "bg-success",
-                                                    "Cancelled" => "bg-danger",
-                                                    _ => "bg-secondary"
-                                                };
-
-                                                var statusText = order.Status switch
-                                                {
-                                                    "Pending" => "Chờ thanh toán",
-                                                    "Processing" => "Đang xử lý",
-                                                    "Paid" => "Đã thanh toán",
-                                                    "Shipped" => "Đang giao",
-                                                    "Delivered" => "Đã giao",
-                                                    "Cancelled" => "Đã hủy",
-                                                    _ => order.Status
-                                                };
-
-                                                <tr class="border-bottom">
-                                                    <td class="fw-bold text-primary">#@order.Id</td>
-                                                    <td>
-                                                        <small class="text-muted d-block">@order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy")</small>
-                                                        <small class="text-muted">@order.OrderDate.ToLocalTime().ToString("HH:mm")</small>
-                                                    </td>
-                                                    <td>
-                                                        @if (order.OrderDetails != null && order.OrderDetails.Any())
-                                                        {
-                                                            <small class="badge bg-light text-dark">@order.OrderDetails.Count() sản phẩm</small>
-                                                        }
-                                                        else
-                                                        {
-                                                            <small class="text-muted">-</small>
-                                                        }
-                                                    </td>
-                                                    <td class="text-end fw-bold text-danger">@order.TotalPrice.ToString("#,##0") đ</td>
-                                                    <td>
-                                                        <span class="badge @statusBadgeClass">@statusText</span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <a asp-action="OrderDetails" asp-route-id="@order.Id" 
-                                                           class="btn btn-sm btn-outline-primary me-1" 
-                                                           title="Xem chi tiết">
-                                                            <i class="bi bi-eye"></i>
-                                                        </a>
-                                                        @if (order.Status != "Shipped" && order.Status != "Delivered" && order.Status != "Cancelled")
-                                                        {
-                                                            <form asp-action="CancelOrder" method="post" style="display:inline;">
-                                                                <input type="hidden" name="id" value="@order.Id" />
-                                                                <button type="submit" class="btn btn-sm btn-outline-danger" 
-                                                                        onclick="return confirm('Bạn có chắc muốn hủy đơn hàng #@order.Id?');" 
-                                                                        title="Hủy đơn hàng">
-                                                                    <i class="bi bi-trash"></i>
-                                                                </button>
-                                                            </form>
-                                                        }
-                                                    </td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
+            <!-- Statistics Sidebar -->
+            <div class="col-lg-3">
+                <!-- Recent Orders Card -->
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-clock-history me-2"></i>Đơn hàng gần đây
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (Model == null || !Model.Any())
+                        {
+                            <div class="p-3 text-center text-muted small">
+                                <p class="mb-0">Chưa có đơn hàng</p>
                             </div>
+                        }
+                        else
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var order in Model.Take(5))
+                                {
+                                    var statusBadgeClass = order.Status switch
+                                    {
+                                        "Pending" => "bg-warning text-dark",
+                                        "Processing" => "bg-info",
+                                        "Paid" => "bg-success",
+                                        "Shipped" => "bg-primary",
+                                        "Delivered" => "bg-success",
+                                        "Cancelled" => "bg-danger",
+                                        _ => "bg-secondary"
+                                    };
 
-                            <!-- Pending Orders -->
-                            <div class="tab-pane fade" id="pending-orders" role="tabpanel" aria-labelledby="pending-tab">
-                                @{
-                                    var allPendingOrders = Model.Where(o => o.Status == "Pending" || o.Status == "Processing").ToList();
-                                }
-                                @if (!allPendingOrders.Any())
-                                {
-                                    <div class="alert alert-info text-center py-4">
-                                        <p class="mb-0">Không có đơn hàng nào đang chờ xử lý</p>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="table-responsive">
-                                        <table class="table table-hover align-middle mb-0">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Mã đơn</th>
-                                                    <th>Ngày đặt</th>
-                                                    <th class="text-end">Tổng tiền</th>
-                                                    <th class="text-center">Hành động</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach (var order in allPendingOrders.OrderByDescending(o => o.OrderDate))
-                                                {
-                                                    <tr>
-                                                        <td class="fw-bold text-primary">#@order.Id</td>
-                                                        <td>@order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
-                                                        <td class="text-end fw-bold text-danger">@order.TotalPrice.ToString("#,##0") đ</td>
-                                                        <td class="text-center">
-                                                            <a asp-action="OrderDetails" asp-route-id="@order.Id" 
-                                                               class="btn btn-sm btn-outline-primary me-1">
-                                                                <i class="bi bi-eye"></i>
-                                                            </a>
-                                                            <form asp-action="CancelOrder" method="post" style="display:inline;">
-                                                                <input type="hidden" name="id" value="@order.Id" />
-                                                                <button type="submit" class="btn btn-sm btn-outline-danger" 
-                                                                        onclick="return confirm('Bạn có chắc muốn hủy đơn hàng #@order.Id?');">
-                                                                    <i class="bi bi-trash"></i>
-                                                                </button>
-                                                            </form>
-                                                        </td>
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                    var statusText = order.Status switch
+                                    {
+                                        "Pending" => "Chờ TT",
+                                        "Processing" => "Xử lý",
+                                        "Paid" => "Đã TT",
+                                        "Shipped" => "Đang giao",
+                                        "Delivered" => "Đã giao",
+                                        "Cancelled" => "Hủy",
+                                        _ => order.Status
+                                    };
+
+                                    <a href="@Url.Action("OrderDetails", new { id = order.Id })" 
+                                       class="list-group-item list-group-item-action p-3 text-decoration-none">
+                                        <div class="d-flex justify-content-between align-items-start gap-2">
+                                            <div style="flex: 1; min-width: 0;">
+                                                <h6 class="mb-1 fw-bold" style="font-size: 0.85rem;">
+                                                    Đơn #@order.Id
+                                                </h6>
+                                                <small class="text-muted d-block">
+                                                    @order.OrderDate.ToLocalTime().ToString("dd/MM HH:mm")
+                                                </small>
+                                            </div>
+                                            <div class="text-end flex-shrink-0">
+                                                <span class="badge @statusBadgeClass" style="font-size: 0.65rem; white-space: nowrap;">
+                                                    @statusText
+                                                </span>
+                                                <br />
+                                                <small class="fw-bold text-danger d-block mt-1">
+                                                    @order.TotalPrice.ToString("#,##0") đ
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </a>
                                 }
                             </div>
+                        }
+                    </div>
+                </div>
 
-                            <!-- Delivered Orders -->
-                            <div class="tab-pane fade" id="delivered-orders" role="tabpanel" aria-labelledby="delivered-tab">
-                                @{
-                                    var allDeliveredOrders = Model.Where(o => o.Status == "Delivered").ToList();
-                                }
-                                @if (!allDeliveredOrders.Any())
-                                {
-                                    <div class="alert alert-info text-center py-4">
-                                        <p class="mb-0">Không có đơn hàng nào đã giao</p>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="table-responsive">
-                                        <table class="table table-hover align-middle mb-0">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Mã đơn</th>
-                                                    <th>Ngày giao</th>
-                                                    <th class="text-end">Tổng tiền</th>
-                                                    <th class="text-center">Hành động</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach (var order in allDeliveredOrders.OrderByDescending(o => o.OrderDate))
-                                                {
-                                                    <tr>
-                                                        <td class="fw-bold text-success">#@order.Id</td>
-                                                        <td>@order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
-                                                        <td class="text-end fw-bold text-danger">@order.TotalPrice.ToString("#,##0") đ</td>
-                                                        <td class="text-center">
-                                                            <a asp-action="OrderDetails" asp-route-id="@order.Id" 
-                                                               class="btn btn-sm btn-outline-primary">
-                                                                <i class="bi bi-eye"></i> Xem
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                }
-                            </div>
-
-                            <!-- Cancelled Orders -->
-                            <div class="tab-pane fade" id="cancelled-orders" role="tabpanel" aria-labelledby="cancelled-tab">
-                                @{
-                                    var allCancelledOrders = Model.Where(o => o.Status == "Cancelled").ToList();
-                                }
-                                @if (!allCancelledOrders.Any())
-                                {
-                                    <div class="alert alert-info text-center py-4">
-                                        <p class="mb-0">Không có đơn hàng nào đã hủy</p>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="table-responsive">
-                                        <table class="table table-hover align-middle mb-0">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Mã đơn</th>
-                                                    <th>Ngày đặt</th>
-                                                    <th class="text-end">Tổng tiền</th>
-                                                    <th class="text-center">Hành động</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach (var order in allCancelledOrders.OrderByDescending(o => o.OrderDate))
-                                                {
-                                                    <tr>
-                                                        <td class="fw-bold text-danger">#@order.Id</td>
-                                                        <td>@order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
-                                                        <td class="text-end fw-bold text-danger">@order.TotalPrice.ToString("#,##0") đ</td>
-                                                        <td class="text-center">
-                                                            <a asp-action="OrderDetails" asp-route-id="@order.Id" 
-                                                               class="btn btn-sm btn-outline-primary">
-                                                                <i class="bi bi-eye"></i> Xem
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                }
-                            </div>
+                <!-- Statistics Card -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-bar-chart me-2"></i>Thống kê
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        @{
+                            var totalOrders = Model?.Count() ?? 0;
+                            var totalSpent = Model?.Sum(o => o.TotalPrice) ?? 0;
+                            var pendingOrders = Model?.Count(o => o.Status == "Pending" || o.Status == "Processing") ?? 0;
+                            var deliveredOrders = Model?.Count(o => o.Status == "Delivered") ?? 0;
+                        }
+                        <div class="mb-3 pb-3 border-bottom">
+                            <small class="text-muted d-block mb-1">Tổng đơn hàng</small>
+                            <h5 class="mb-0 text-primary">@totalOrders</h5>
                         </div>
-                    }
+                        <div class="mb-3 pb-3 border-bottom">
+                            <small class="text-muted d-block mb-1">Tổng chi tiêu</small>
+                            <h5 class="mb-0 text-danger">@totalSpent.ToString("#,##0") đ</h5>
+                        </div>
+                        <div class="mb-3 pb-3 border-bottom">
+                            <small class="text-muted d-block mb-1">Đang xử lý</small>
+                            <h5 class="mb-0 text-warning">@pendingOrders</h5>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block mb-1">Đã giao hàng</small>
+                            <h5 class="mb-0 text-success">@deliveredOrders</h5>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    }
+</div>
 
-        <!-- Sidebar -->
-        <div class="col-lg-3">
-            <!-- Recent Orders Summary -->
-            <div class="card shadow-sm border-0 mb-3">
-                <div class="card-header bg-info text-white d-flex align-items-center justify-content-between">
-                    <h6 class="mb-0">
-                        <i class="bi bi-clock-history me-2"></i>Tất cả đơn hàng
-                    </h6>
-                    <small class="badge bg-light text-info">@(Model?.Count() ?? 0)</small>
-                </div>
-                <div class="card-body p-0" style="max-height: 600px; overflow-y: auto;">
-                    @if (Model == null || !Model.Any())
-                    {
-                        <div class="p-3 text-center text-muted small">
-                            <i class="bi bi-inbox" style="font-size: 1.5rem;"></i>
-                            <p class="mb-0 mt-2">Chưa có đơn hàng</p>
-                        </div>
+<!-- Detailed Order View (Optional Accordion) -->
+@if (Model != null && Model.Any())
+{
+    <div class="container mt-5 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="bi bi-folder-open me-2"></i>Chi tiết đơn hàng
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="accordion" id="orderAccordion">
+                    @{
+                        int index = 0;
                     }
-                    else
+                    @foreach (var order in Model)
                     {
-                        <div class="list-group list-group-flush">
-                            @foreach (var order in Model.OrderByDescending(o => o.OrderDate))
-                            {
-                                var statusBgClass = order.Status switch
-                                {
-                                    "Pending" => "bg-warning-light",
-                                    "Processing" => "bg-info-light",
-                                    "Paid" => "bg-success-light",
-                                    "Shipped" => "bg-primary-light",
-                                    "Delivered" => "bg-success-light",
-                                    "Cancelled" => "bg-danger-light",
-                                    _ => "bg-secondary-light"
-                                };
+                        var statusBadgeClass = order.Status switch
+                        {
+                            "Pending" => "bg-warning text-dark",
+                            "Processing" => "bg-info",
+                            "Paid" => "bg-success",
+                            "Shipped" => "bg-primary",
+                            "Delivered" => "bg-success",
+                            "Cancelled" => "bg-danger",
+                            _ => "bg-secondary"
+                        };
 
-                                var statusTextColor = order.Status switch
-                                {
-                                    "Pending" => "text-warning",
-                                    "Processing" => "text-info",
-                                    "Paid" => "text-success",
-                                    "Shipped" => "text-primary",
-                                    "Delivered" => "text-success",
-                                    "Cancelled" => "text-danger",
-                                    _ => "text-secondary"
-                                };
+                        var statusText = order.Status switch
+                        {
+                            "Pending" => "Chờ thanh toán",
+                            "Processing" => "Đang xử lý",
+                            "Paid" => "Đã thanh toán",
+                            "Shipped" => "Đang giao",
+                            "Delivered" => "Đã giao",
+                            "Cancelled" => "Đã hủy",
+                            _ => order.Status
+                        };
 
-                                var statusIcon = order.Status switch
-                                {
-                                    "Pending" => "⏳",
-                                    "Processing" => "⚙️",
-                                    "Paid" => "✅",
-                                    "Shipped" => "🚚",
-                                    "Delivered" => "✔️",
-                                    "Cancelled" => "❌",
-                                    _ => "❓"
-                                };
+                        <div class="accordion-item border-0 border-bottom">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#order_@order.Id" aria-expanded="false">
+                                    <i class="bi bi-chevron-right me-2"></i>
+                                    <span class="fw-bold">Đơn hàng #@order.Id</span>
+                                    <span class="ms-auto me-3 text-muted small">
+                                        @order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                    </span>
+                                    <span class="badge @statusBadgeClass">@statusText</span>
+                                </button>
+                            </h2>
+                            <div id="order_@order.Id" class="accordion-collapse collapse" data-bs-parent="#orderAccordion">
+                                <div class="accordion-body p-4 bg-light">
+                                    <!-- Order Items -->
+                                    <h6 class="fw-bold mb-3">Sản phẩm đã đặt</h6>
+                                    <div class="table-responsive mb-3">
+                                        <table class="table table-sm mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Sản phẩm</th>
+                                                    <th class="text-center">Số lượng</th>
+                                                    <th class="text-end">Đơn giá</th>
+                                                    <th class="text-end">Thành tiền</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if (order.OrderDetails != null && order.OrderDetails.Any())
+                                                {
+                                                    @foreach (var detail in order.OrderDetails)
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                <strong>@(detail.Product?.Name ?? $"Sản phẩm #{detail.ProductId}")</strong>
+                                                            </td>
+                                                            <td class="text-center">@detail.Quantity</td>
+                                                            <td class="text-end">@detail.Price.ToString("#,##0") đ</td>
+                                                            <td class="text-end fw-bold">@((detail.Price * detail.Quantity).ToString("#,##0")) đ</td>
+                                                        </tr>
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
 
-                                <a href="@Url.Action("OrderDetails", new { id = order.Id })" 
-                                   class="list-group-item list-group-item-action p-3 text-decoration-none border-bottom">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div style="flex: 1;">
-                                            <h6 class="mb-1 fw-bold text-dark">
-                                                <i class="bi bi-receipt me-1"></i>Đơn #@order.Id
-                                            </h6>
-                                            <small class="text-muted d-block mb-2">
-                                                @order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
-                                            </small>
-                                            <small class="badge bg-light text-dark">
-                                                @(order.OrderDetails?.Count ?? 0) sản phẩm
-                                            </small>
-                                        </div>
-                                        <div class="text-end">
-                                            <div class="fw-bold text-danger" style="font-size: 0.85rem;">
-                                                @order.TotalPrice.ToString("#,##0") đ
+                                    <!-- Order Info -->
+                                    <hr />
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <h6 class="fw-bold mb-2">Thông tin giao hàng</h6>
+                                            <div class="small">
+                                                <p class="mb-1"><strong>Địa chỉ:</strong> @order.ShippingAddress</p>
+                                                <p class="mb-1"><strong>Số điện thoại:</strong> @order.PhoneNumber</p>
+                                                @if (!string.IsNullOrEmpty(order.Notes))
+                                                {
+                                                    <p class="mb-0"><strong>Ghi chú:</strong> @order.Notes</p>
+                                                }
                                             </div>
-                                            <small class="@statusTextColor d-block" style="font-size: 0.75rem;">
-                                                @statusIcon
-                                            </small>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6 class="fw-bold mb-2">Tổng kết</h6>
+                                            <div class="bg-white p-3 rounded border">
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Tổng tiền:</span>
+                                                    <strong>@order.TotalPrice.ToString("#,##0") đ</strong>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Trạng thái:</span>
+                                                    <span class="badge @statusBadgeClass">@statusText</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </a>
-                            }
-                        </div>
-                    }
-                </div>
-            </div>
 
-            <!-- Order Statistics -->
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-success text-white">
-                    <h6 class="mb-0">
-                        <i class="bi bi-bar-chart me-2"></i>Thống kê
-                    </h6>
-                </div>
-                <div class="card-body">
-                    @{
-                        var totalOrders = Model?.Count() ?? 0;
-                        var totalSpent = Model?.Sum(o => o.TotalPrice) ?? 0;
-                        var pendingOrders = Model?.Count(o => o.Status == "Pending" || o.Status == "Processing") ?? 0;
-                        var deliveredOrders = Model?.Count(o => o.Status == "Delivered") ?? 0;
+                                    <!-- Action Buttons -->
+                                    <div class="mt-3">
+                                        <a asp-action="OrderDetails" asp-route-id="@order.Id" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-eye me-1"></i>Xem chi tiết đầy đủ
+                                        </a>
+                                        @if (order.Status != "Shipped" && order.Status != "Delivered" && order.Status != "Cancelled")
+                                        {
+                                            <form asp-action="CancelOrder" method="post" style="display:inline;">
+                                                <input type="hidden" name="id" value="@order.Id" />
+                                                <button type="submit" class="btn btn-sm btn-danger" 
+                                                        onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này?');">
+                                                    <i class="bi bi-trash me-1"></i>Hủy đơn
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     }
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <div class="bg-light p-3 rounded text-center">
-                                <h5 class="text-primary mb-0 fw-bold">@totalOrders</h5>
-                                <small class="text-muted">Tổng đơn hàng</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="bg-light p-3 rounded text-center">
-                                <h5 class="text-success mb-0 fw-bold">@deliveredOrders</h5>
-                                <small class="text-muted">Đã giao</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <div class="bg-light p-3 rounded text-center">
-                                <h5 class="text-warning mb-0 fw-bold">@pendingOrders</h5>
-                                <small class="text-muted">Đang xử lý</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="bg-light p-3 rounded text-center">
-                                <h5 class="text-danger mb-0 fw-bold">@(totalSpent > 0 ? (totalSpent / 1000000).ToString("N1") : 0)M</h5>
-                                <small class="text-muted">Tổng chi</small>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<style>
-    .bg-warning-light { background-color: #fff3cd !important; }
-    .bg-info-light { background-color: #cfe2ff !important; }
-    .bg-success-light { background-color: #d1e7dd !important; }
-    .bg-danger-light { background-color: #f8d7da !important; }
-    .bg-primary-light { background-color: #cfe2ff !important; }
-    .bg-secondary-light { background-color: #e2e3e5 !important; }
-</style>
+}

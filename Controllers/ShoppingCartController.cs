@@ -449,6 +449,55 @@ namespace TINH_FINAL_2256.Controllers
             }
         }
 
+        // Export current customer's orders to Excel
+        [Authorize]
+        public async Task<IActionResult> ExportMyOrdersToExcel()
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null && User.Identity?.IsAuthenticated == true)
+                {
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+                    if (!string.IsNullOrEmpty(userId)) user = await _userManager.FindByIdAsync(userId);
+                }
+
+                if (user == null) return Challenge();
+
+                var orders = await _context.Orders
+                    .Where(o => o.UserId == user.Id)
+                    .Include(o => o.ApplicationUser)
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
+                    .OrderByDescending(o => o.OrderDate)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                var exportData = orders.Select(o => new
+                {
+                    o.Id,
+                    Customer = o.ApplicationUser?.Email ?? o.UserId,
+                    o.PhoneNumber,
+                    o.ShippingAddress,
+                    OrderDate = o.OrderDate.ToString("yyyy-MM-dd HH:mm"),
+                    Total = o.TotalPrice,
+                    Status = o.Status,
+                    ItemCount = o.OrderDetails?.Count ?? 0
+                }).ToList();
+
+                var bytes = _excelService.ExportToExcel(exportData, "MyOrders");
+
+                return File(bytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"MyOrders_{DateTime.UtcNow:yyyyMMdd_HHmmss}.xlsx");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting customer orders to Excel");
+                return BadRequest("L?i khi xu?t Excel");
+            }
+        }
+
         // Get recent orders for cart modal (AJAX endpoint)
         [Authorize]
         public async Task<IActionResult> GetRecentOrders()
@@ -469,8 +518,11 @@ namespace TINH_FINAL_2256.Controllers
                     .Include(o => o.OrderDetails)
                         .ThenInclude(od => od.Product)
                     .OrderByDescending(o => o.OrderDate)
-                    .Take(3)
+                    .Take(5)
+                    .AsNoTracking()
                     .ToListAsync();
+
+                _logger.LogInformation("Recent orders loaded for user {UserId}", user.Id);
 
                 return PartialView("_RecentOrdersPartial", orders);
             }
@@ -578,8 +630,10 @@ namespace TINH_FINAL_2256.Controllers
             {
                 var orders = await _context.Orders
                     .Include(o => o.ApplicationUser)
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
                     .OrderByDescending(o => o.OrderDate)
-                    .Take(10)
+                    .AsNoTracking()
                     .ToListAsync();
 
                 return PartialView("_AdminOrdersPartial", orders);
@@ -592,8 +646,7 @@ namespace TINH_FINAL_2256.Controllers
         }
 
         // ?? Export orders to Excel
-        [Authorize(Roles = "Admin")]
-        [HttpGet("export-orders-excel")]
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> ExportOrdersToExcel()
         {
             try
@@ -601,18 +654,28 @@ namespace TINH_FINAL_2256.Controllers
                 var orders = await _context.Orders
                     .Include(o => o.ApplicationUser)
                     .Include(o => o.OrderDetails)
+                    .OrderByDescending(o => o.OrderDate)
                     .ToListAsync();
 
                 // Transform to dynamic for Excel
                 var exportData = orders.Select(o => new
                 {
-                    o.Id,
-                    CustomerName = o.ApplicationUser?.UserName ?? "Unknown",
-                    o.PhoneNumber,
-                    o.ShippingAddress,
-                    o.OrderDate,
-                    o.TotalPrice,
-                    o.Status,
+                    OrderId = o.Id,
+                    Customer = o.ApplicationUser?.Email ?? "Unknown",
+                    Phone = o.PhoneNumber,
+                    Address = o.ShippingAddress,
+                    OrderDate = o.OrderDate.ToString("dd/MM/yyyy HH:mm"),
+                    TotalPrice = o.TotalPrice,
+                    Status = o.Status switch
+                    {
+                        "Pending" => "Ch? TT",
+                        "Processing" => "X? lý",
+                        "Paid" => "?ã TT",
+                        "Shipped" => "?ang giao",
+                        "Delivered" => "?ã giao",
+                        "Cancelled" => "?ã h?y",
+                        _ => o.Status
+                    },
                     ItemCount = o.OrderDetails?.Count ?? 0
                 }).ToList();
 
@@ -627,7 +690,66 @@ namespace TINH_FINAL_2256.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error exporting orders to Excel");
-                return BadRequest("Có l?i x?y ra khi xu?t Excel");
+                TempData["ErrorMessage"] = "L?i khi xu?t Excel: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // Get all orders for current customer (for modal view)
+        [Authorize]
+        public async Task<IActionResult> GetAllCustomerOrdersPartial()
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null && User.Identity?.IsAuthenticated == true)
+                {
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+                    if (!string.IsNullOrEmpty(userId)) user = await _userManager.FindByIdAsync(userId);
+                }
+
+                if (user == null) return Unauthorized();
+
+                var orders = await _context.Orders
+                    .Where(o => o.UserId == user.Id)
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
+                    .OrderByDescending(o => o.OrderDate)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                _logger.LogInformation("All customer orders loaded for user {UserId}", user.Id);
+
+                return PartialView("_AllCustomerOrdersPartial", orders);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading all customer orders");
+                return PartialView("_AllCustomerOrdersPartial", new List<Order>());
+            }
+        }
+
+        [Authorize(Roles = SD.Role_Admin)]
+        public async Task<IActionResult> AdminOrders()
+        {
+            try
+            {
+                var orders = await _context.Orders
+                    .Include(o => o.ApplicationUser)
+                    .Include(o => o.OrderDetails)
+                        .ThenInclude(od => od.Product)
+                    .OrderByDescending(o => o.OrderDate)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                _logger.LogInformation("AdminOrders view loaded by admin");
+                return View("AdminOrders", orders);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading AdminOrders view");
+                TempData["ErrorMessage"] = "L?i khi t?i danh sách ??n hàng.";
+                return RedirectToAction("Index");
             }
         }
     }

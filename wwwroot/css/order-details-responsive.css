@@ -1,6 +1,102 @@
 /* Order Details Responsive Styles */
 
-@@media (max-width: 576px) {
+/* Modal & Cart Summary Styles */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.list-group-item {
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa !important;
+    border-left-color: #0d6efd;
+    padding-left: calc(0.75rem + 3px);
+}
+
+.list-group-item-action {
+    cursor: pointer;
+}
+
+/* Order Table Styles */
+.table-responsive {
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: #f8f9fa;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+}
+
+/* Badge & Status Styles */
+.badge {
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.bg-warning.text-dark {
+    background-color: #ffc107 !important;
+}
+
+/* Order Summary Card (Sticky) */
+.sticky-top {
+    z-index: 1020;
+}
+
+.card-header {
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Button Styles */
+.btn {
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Accordion Styles */
+.accordion-button {
+    font-weight: 500;
+    padding: 1rem;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #e7f1ff;
+    box-shadow: none;
+}
+
+.accordion-body {
+    padding: 1.5rem;
+}
+
+/* Product Image Styles */
+[style*="width:50px"][style*="height:50px"] {
+    border: 1px solid #dee2e6;
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
     .timeline-step:not(:last-child)::after {
         display: none;
     }
@@ -23,20 +119,55 @@
         font-size: 0.85rem;
     }
 
+    .table th, .table td {
+        padding: 0.5rem 0.25rem;
+    }
+
     .btn {
         padding: 0.4rem 0.8rem;
         font-size: 0.85rem;
     }
+
+    .card-header {
+        padding: 0.75rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .d-flex.gap-2 {
+        gap: 0.5rem !important;
+        flex-wrap: wrap;
+    }
+
+    .sticky-top {
+        position: static !important;
+        margin-bottom: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.25rem;
+    }
+
+    h5 {
+        font-size: 1rem;
+    }
 }
 
-@@media (max-width: 768px) {
+@media (max-width: 768px) {
     .d-flex.align-items-center.justify-content-between {
         flex-direction: column;
         align-items: flex-start;
     }
     
     .text-end {
-        text-align: left;
+        text-align: left !important;
+        margin-top: 0.5rem;
+    }
+
+    .row.g-4 {
+        --bs-gutter-x: 1rem;
     }
 }
 
@@ -45,27 +176,81 @@
     font-size: 0.75rem;
 }
 
-.badge {
-    word-break: break-word;
-}
-
-.table-responsive {
-    border-radius: 0.25rem;
-}
-
 .card-body p {
     word-break: break-word;
     overflow-wrap: break-word;
 }
 
 /* Print styles */
-@@media print {
+@media print {
     .btn,
-    .contact-btn {
-        display: none;
+    .contact-btn,
+    .card-header,
+    .navbar,
+    footer,
+    .sticky-top {
+        display: none !important;
     }
 
     .card {
         page-break-inside: avoid;
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+
+    .table {
+        border-collapse: collapse;
+    }
+
+    .table th, .table td {
+        border: 1px solid #000 !important;
+    }
+
+    body {
+        padding: 0;
+        margin: 0;
+    }
+
+    .container {
+        max-width: 100%;
+    }
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.list-group-item {
+    animation: slideIn 0.3s ease;
+}
+
+/* Loading Spinner */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.2em;
+}
+
+/* Dark Mode Support (Optional) */
+@media (prefers-color-scheme: dark) {
+    .table-light {
+        background-color: #343a40 !important;
+        color: #fff;
+    }
+
+    .bg-light {
+        background-color: #495057 !important;
+    }
+
+    .text-muted {
+        color: #adb5bd !important;
     }
 }
