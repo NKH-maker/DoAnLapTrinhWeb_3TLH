@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "H? tr? tr?c tuy?n";
+    ViewData["Title"] = "Hổ trợ trực tuyến";
 }
 
 <link rel="stylesheet" href="~/css/chat.css" />
@@ -10,7 +10,7 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">
-                        <i class="bi bi-chat-dots"></i> H? tr? tr?c tuy?n
+                        <i class="bi bi-chat-dots"></i> Hổ trợ trực tuyến
                     </h5>
                 </div>
                 <div class="card-body p-0">
@@ -27,7 +27,7 @@
                         <div class="input-group">
                             <input type="text" id="messageInput" class="form-control" placeholder="Nhập tin nhắn..." />
                             <button class="btn btn-primary" type="button" id="sendBtn">
-                                <i class="bi bi-send"></i> G?i
+                                <i class="bi bi-send"></i> Gọi
                             </button>
                         </div>
                         <small class="text-muted mt-2 d-block">
@@ -42,7 +42,7 @@
                 <div class="col-md-6">
                     <div class="card border-0 bg-light">
                         <div class="card-body text-center">
-                            <h6 class="mb-2">?? Gọi trực tiếp</h6>
+                            <h6 class="mb-2">Gọi trực tiếp</h6>
                             <p class="mb-0"><strong>0123 456 789</strong></p>
                             <small class="text-muted">9AM - 9PM, Hàng ngày</small>
                         </div>
@@ -51,9 +51,9 @@
                 <div class="col-md-6">
                     <div class="card border-0 bg-light">
                         <div class="card-body text-center">
-                            <h6 class="mb-2">?? Email h? tr?</h6>
+                            <h6 class="mb-2" Email hổ trợ</h6>
                             <p class="mb-0"><strong>support@3tlhphone.com</strong></p>
-                            <small class="text-muted">Trả lời trong 24 gi?</small>
+                            <small class="text-muted">Trả lời trong 24 giờ</small>
                         </div>
                     </div>
                 </div>
@@ -76,7 +76,7 @@
     // K?t n?i t?i hub
     connection.start().catch(err => {
         console.error('SignalR connection error:', err);
-        showAlert('L?i k?t n?i. Vui lòng t?i l?i trang.', 'danger');
+        showAlert('Lỗi kết nối. Vui lòng tải lại trang.', 'danger');
     });
 
     // Nh?n tin nh?n t? server
@@ -97,7 +97,7 @@
         // G?i qua SignalR
         connection.invoke("SendSupportMessage", message).catch(err => {
             console.error('Error sending message:', err);
-            showAlert('Không th? g?i tin nh?n. Vui lòng th? l?i.', 'danger');
+            showAlert('Không thể gửi tin nhắn. Vui lòng thử lại.', 'danger');
         });
 
         // Hi?n th? tin nh?n c?a user ngay l?p t?c
