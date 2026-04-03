@@ -88,16 +88,27 @@ try
 
     // Services
     builder.Services.AddScoped<IEmailService, EmailService>();
-    // Replace RabbitMQ-backed IMessageQueueService with a lightweight null implementation to avoid external MQ dependency
-    builder.Services.AddScoped<IMessageQueueService, NullMessageQueueService>();
+    // Enable RabbitMQ-backed IMessageQueueService
+    builder.Services.AddScoped<IMessageQueueService, RabbitMQService>();
     builder.Services.AddScoped<IBackgroundJobService, BackgroundJobService>();
     builder.Services.AddScoped<IQRCodeService, QRCodeService>();
     builder.Services.AddScoped<IExcelService, ExcelService>();
     builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 
+    // RabbitMQ Connection Factory
+    builder.Services.AddSingleton<RabbitMQ.Client.IConnectionFactory>(sp =>
+    {
+        return new RabbitMQ.Client.ConnectionFactory()
+        {
+            HostName = builder.Configuration["RabbitMQ:HostName"] ?? "localhost",
+            Port = int.Parse(builder.Configuration["RabbitMQ:Port"] ?? "5672"),
+            UserName = builder.Configuration["RabbitMQ:UserName"] ?? "guest",
+            Password = builder.Configuration["RabbitMQ:Password"] ?? "guest"
+        };
+    });
+
     // Hangfire dashboard authorization filter registration
     builder.Services.AddSingleton<IDashboardAuthorizationFilter, HangfireAuthorizationFilter>();
-
     var app = builder.Build();
 
     // Initialize Roles

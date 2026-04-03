@@ -36,14 +36,14 @@
 
                     <!-- Login Form -->
                     <form id="account" method="post" class="needs-validation">
-                        <!-- Email Field -->
+                        <!-- Email/Username Field -->
                         <div class="mb-3">
                             <label asp-for="Input.Email" class="form-label fw-semibold">
-                                <i class="bi bi-envelope text-primary me-2"></i>Email
+                                <i class="bi bi-person-badge text-primary me-2"></i>Tài khoản hoặc Email
                             </label>
                             <input asp-for="Input.Email" 
                                    class="form-control form-control-lg border-2" 
-                                   placeholder="example@email.com" 
+                                   placeholder="Email hoặc tên đăng nhập" 
                                    autocomplete="username"
                                    required />
                             <span asp-validation-for="Input.Email" class="text-danger small d-block mt-1"></span>

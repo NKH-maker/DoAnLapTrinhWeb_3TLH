@@ -10,13 +10,16 @@ namespace TINH_FINAL_2256.Areas.Identity.Pages.Account
     public class LoginModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<LoginModel> _logger;
 
         public LoginModel(
             SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager,
             ILogger<LoginModel> logger)
         {
             _signInManager = signInManager;
+            _userManager = userManager;
             _logger = logger;
         }
 
@@ -27,9 +30,8 @@ namespace TINH_FINAL_2256.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            [Required(ErrorMessage = "Email là bắt buộc")]
-            [EmailAddress(ErrorMessage = "Email không hợp lệ")]
-            [Display(Name = "Email")]
+            [Required(ErrorMessage = "Email hoặc tên đăng nhập là bắt buộc")]
+            [Display(Name = "Email hoặc tên đăng nhập")]
             public string Email { get; set; } = string.Empty;
 
             [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
@@ -60,31 +62,56 @@ namespace TINH_FINAL_2256.Areas.Identity.Pages.Account
             {
                 try
                 {
-                    var result = await _signInManager.PasswordSignInAsync(
-                        Input.Email, 
-                        Input.Password, 
-                        Input.RememberMe, 
-                        lockoutOnFailure: false);
+                    var login = Input.Email?.Trim() ?? string.Empty;
+
+                    ApplicationUser? user = null;
+
+                    // Thử tìm user theo email trước, nếu không có thì theo username
+                    try
+                    {
+                        user = await _userManager.FindByEmailAsync(login);
+                    }
+                    catch { /* ignore */ }
+
+                    if (user == null)
+                    {
+                        try
+                        {
+                            user = await _userManager.FindByNameAsync(login);
+                        }
+                        catch { /* ignore */ }
+                    }
+
+                    Microsoft.AspNetCore.Identity.SignInResult result;
+                    if (user != null)
+                    {
+                        result = await _signInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                    }
+                    else
+                    {
+                        // Fallback: thử sign-in trực tiếp bằng chuỗi nhập vào (nếu userName = input)
+                        result = await _signInManager.PasswordSignInAsync(login, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                    }
 
                     if (result.Succeeded)
                     {
-                        _logger.LogInformation("Đăng nhập thành công cho user {Email}", Input.Email);
+                        _logger.LogInformation("Đăng nhập thành công cho user {Login}", login);
                         return LocalRedirect(returnUrl);
                     }
                     else if (result.IsLockedOut)
                     {
-                        _logger.LogWarning("Tài khoản {Email} bị khóa", Input.Email);
+                        _logger.LogWarning("Tài khoản {Login} bị khóa", login);
                         ModelState.AddModelError(string.Empty, "Tài khoản của bạn bị khóa. Vui lòng thử lại sau.");
                     }
                     else if (result.RequiresTwoFactor)
                     {
-                        _logger.LogInformation("Yêu cầu 2FA cho user {Email}", Input.Email);
+                        _logger.LogInformation("Yêu cầu 2FA cho user {Login}", login);
                         return RedirectToPage("./LoginWith2fa", new { returnUrl, rememberMe = Input.RememberMe });
                     }
                     else
                     {
-                        _logger.LogWarning("Đăng nhập không thành công cho user {Email}", Input.Email);
-                        ModelState.AddModelError(string.Empty, "Email hoặc mật khẩu không đúng.");
+                        _logger.LogWarning("Đăng nhập không thành công cho user {Login}", login);
+                        ModelState.AddModelError(string.Empty, "Tài khoản hoặc mật khẩu không đúng.");
                     }
                 }
                 catch (Exception ex)
@@ -103,9 +130,9 @@ namespace TINH_FINAL_2256.Areas.Identity.Pages.Account
             // Đăng nhập bằng OAuth (Google, Facebook, v.v.)
             var redirectUrl = Url.Page("./LoginCallback", pageHandler: null, values: new { returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            
+
             _logger.LogInformation("Bắt đầu đăng nhập OAuth với provider {Provider}", provider);
-            
+
             return new ChallengeResult(provider, properties);
         }
     }
