@@ -62,14 +62,8 @@
                     <div>@Model.Items.Sum(i => i.Price * i.Quantity).ToString("#,##0") đ</div>
                 </div>
 
-                <div class="d-grid gap-2 mb-3">
-                    <a asp-controller="ShoppingCart" asp-action="Index" class="btn btn-primary btn-sm" data-bs-dismiss="modal">
-                        <i class="bi bi-bag me-1"></i>Xem giỏ hàng
-                    </a>
-                    <a asp-controller="ShoppingCart" asp-action="Checkout" class="btn btn-success btn-sm" data-bs-dismiss="modal">
-                        <i class="bi bi-credit-card me-1"></i>Thanh toán
-                    </a>
-                </div>
+                
+
             }
 
             <!-- Orders Section for Logged-in Users -->
