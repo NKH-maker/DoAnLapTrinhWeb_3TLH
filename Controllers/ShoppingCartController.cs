@@ -317,7 +317,7 @@ namespace TINH_FINAL_2256.Controllers
                 }
 
                 HttpContext.Session.Remove("Cart");
-                return RedirectToAction(nameof(OrderCompleted), new { id });
+                return RedirectToAction(nameof(OrderCompleted), new { id = order.Id });
             }
             catch (Exception ex)
             {
@@ -550,17 +550,18 @@ namespace TINH_FINAL_2256.Controllers
                 if (order.Status == "Shipped" || order.Status == "Delivered")
                 {
                     _logger.LogWarning("Attempt to cancel shipped/delivered order {OrderId}", id);
-                    return BadRequest("Không th? h?y ??n ?ã v?n chuy?n ho?c giao hàng");
+                    TempData["ErrorMessage"] = "Không th? h?y ??n hàng ?ã v?n chuy?n ho?c giao hàng";
+                    return RedirectToAction("Index", "Home");
                 }
 
                 order.Status = "Cancelled";
                 await _context.SaveChangesAsync();
 
-                // ?? G?i notification
+                // G?i notification
                 await _hubContext.Clients.User(user.Id)
                     .SendAsync("OrderCancelled", order.Id);
 
-                // ?? G?i email h?y ??n
+                // G?i email h?y ??n
                 _backgroundJobService.ScheduleEmailJob(
                     user.Email ?? "",
                     "H?y ??n Hàng",
@@ -569,12 +570,20 @@ namespace TINH_FINAL_2256.Controllers
 
                 _logger.LogInformation("Order {OrderId} cancelled by user {UserId}", id, user.Id);
 
-                return RedirectToAction(nameof(MyOrders));
+                // Clear cache
+                await _cache.RemoveAsync($"user_orders_{user.Id}");
+
+                // Thêm thông báo thành công
+                TempData["SuccessMessage"] = $"??n hàng #{order.Id} ?ã ???c h?y thành công";
+
+                // Quay l?i trang Home
+                return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error cancelling order {OrderId}", id);
-                return BadRequest("Có l?i x?y ra khi h?y ??n hàng");
+                TempData["ErrorMessage"] = "Có l?i x?y ra khi h?y ??n hàng";
+                return RedirectToAction("Index", "Home");
             }
         }
 

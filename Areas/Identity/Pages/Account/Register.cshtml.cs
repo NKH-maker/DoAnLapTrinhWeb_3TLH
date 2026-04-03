@@ -112,48 +112,74 @@ namespace TINH_FINAL_2256.Areas.Identity.Pages.Account
 
                     var result = await _userManager.CreateAsync(user, Input.Password);
 
-                    if (result.Succeeded)
+                    if (!result.Succeeded)
                     {
-                        _logger.LogInformation("Người dùng {Email} đăng ký thành công", Input.Email);
+                        // Log chi tiết lỗi và hiển thị cho người dùng
+                        foreach (var error in result.Errors)
+                        {
+                            _logger.LogWarning("Lỗi đăng ký cho {Email}: {Error}", Input.Email, error.Description);
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+                        return Page();
+                    }
 
-                        // Gán vai trò mặc định
-                        var roleToAssign = !string.IsNullOrEmpty(Input.Role) 
-                            ? Input.Role 
-                            : SD.Role_Customer;
+                    _logger.LogInformation("Người dùng {Email} đăng ký thành công", Input.Email);
 
-                        await _userManager.AddToRoleAsync(user, roleToAssign);
-                        _logger.LogInformation("Gán vai trò {Role} cho user {Email}", roleToAssign, Input.Email);
+                    // Gán vai trò mặc định (không làm fail flow nếu có lỗi)
+                    var roleToAssign = !string.IsNullOrEmpty(Input.Role)
+                        ? Input.Role
+                        : SD.Role_Customer;
 
-                        // Gửi email xác thực
+                    var addRoleResult = await _userManager.AddToRoleAsync(user, roleToAssign);
+                    if (!addRoleResult.Succeeded)
+                    {
+                        _logger.LogWarning("Không thể gán vai trò {Role} cho user {Email}. Errors: {Errors}",
+                            roleToAssign, Input.Email, string.Join(";", addRoleResult.Errors.Select(e => e.Description)));
+                        // Không thêm ModelState error để tránh báo lỗi trên giao diện khi đăng ký vẫn thành công
+                        TempData["InfoMessage"] = "Tài khoản đã được tạo nhưng có vấn đề khi gán vai trò. Vui lòng liên hệ quản trị viên.";
+                    }
+
+                    // Gửi email xác thực (bắt riêng lỗi gửi mail để không phá flow đăng ký)
+                    bool emailSent = true;
+                    try
+                    {
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                         var callbackUrl = Url.Page("/Account/ConfirmEmail", pageHandler: null, values: new { area = "Identity", userId = user.Id, code }, protocol: Request.Scheme);
 
                         var body = _emailTemplateService.GetEmailConfirmationTemplate(user.FullName, callbackUrl);
 
                         await _emailService.SendEmailAsync(user.Email, "Xác nhận email - 3TLH Phone", body, isHtml: true);
-
-                        // Nếu muốn tự động đăng nhập, có thể gọi SignIn; hiện tại không auto-signin để yêu cầu xác thực
-                        if (!(_userManager.Options.SignIn.RequireConfirmedAccount))
-                        {
-                            await _signInManager.SignInAsync(user, isPersistent: false);
-                            return LocalRedirect(returnUrl);
-                        }
-
-                        // Hiển thị thông báo kiểm tra email
-                        TempData["SuccessMessage"] = "Đăng ký thành công. Vui lòng kiểm tra email để xác nhận tài khoản.";
-                        return RedirectToPage("./Register");
                     }
-
-                    // Log chi tiết lỗi
-                    foreach (var error in result.Errors)
+                    catch (Exception ex)
                     {
-                        _logger.LogWarning("Lỗi đăng ký cho {Email}: {Error}", Input.Email, error.Description);
-                        ModelState.AddModelError(string.Empty, error.Description);
+                        emailSent = false;
+                        _logger.LogWarning(ex, "Không thể gửi email xác thực cho {Email}", user.Email);
+                        TempData["InfoMessage"] = "Tài khoản đã được tạo nhưng email xác thực chưa thể gửi. Vui lòng liên hệ quản trị viên nếu cần.";
                     }
+
+                    // Nếu không yêu cầu xác nhận email thì tự động đăng nhập
+                    if (!(_userManager.Options.SignIn.RequireConfirmedAccount))
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+
+                        // Đặt thông báo thành công rõ ràng
+                        TempData["SuccessMessage"] = "Đăng ký thành công." + (emailSent ? " Vui lòng kiểm tra email để xác nhận tài khoản." : "");
+
+                        return LocalRedirect(returnUrl);
+                    }
+
+                    // Nếu yêu cầu xác nhận, chuyển hướng về trang đăng ký kèm thông báo
+                    TempData["SuccessMessage"] = emailSent
+                        ? "Đăng ký thành công. Vui lòng kiểm tra email để xác nhận tài khoản."
+                        : "Đăng ký thành công. Email xác nhận chưa được gửi, vui lòng liên hệ quản trị viên.";
+
+                    return RedirectToPage("./Register");
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Lỗi khi đăng ký user {Email}", Input.Email);
+                    // Nếu có user đã được tạo nhưng xảy ra lỗi sau đó, ưu tiên thông báo thành công và log lỗi.
+                    // Không thêm ModelState error chung để tránh hiển thị lỗi không chính xác khi đăng ký thực sự thành công.
                     ModelState.AddModelError(string.Empty, "Có lỗi xảy ra. Vui lòng thử lại sau.");
                 }
             }
